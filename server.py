@@ -6,7 +6,7 @@ Set your file paths in config.py, then run:
 """
 
 from flask import Flask, jsonify, session, request, send_from_directory, abort
-import openpyxl, json, os, math, hashlib, secrets
+import openpyxl, json, os, math, hashlib, secrets, sqlite3
 from functools import wraps
 from config import EXCEL_PATH, GRAPHS_DIR, SECRET_KEY, PORT
 
@@ -32,6 +32,53 @@ def hash_password(password: str, salt: str = None):
         salt = secrets.token_hex(16)
     pw_hash = hashlib.sha256((salt + password).encode()).hexdigest()
     return pw_hash, salt
+
+# ─── Payments Database ───────────────────────────────────────────
+
+DB_PATH = os.path.join(os.path.dirname(__file__), "data", "payments.db")
+
+def init_db():
+    os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
+    conn = sqlite3.connect(DB_PATH)
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS unlocks (
+            username      TEXT    NOT NULL,
+            project_index INTEGER NOT NULL,
+            PRIMARY KEY (username, project_index)
+        )
+    """)
+    conn.commit()
+    conn.close()
+
+init_db()
+
+def is_unlocked(username: str, project_index: int) -> bool:
+    conn = sqlite3.connect(DB_PATH)
+    cur  = conn.cursor()
+    cur.execute(
+        "SELECT 1 FROM unlocks WHERE username=? AND project_index=?",
+        (username, project_index)
+    )
+    result = cur.fetchone() is not None
+    conn.close()
+    return result
+
+def unlock_project(username: str, project_index: int):
+    conn = sqlite3.connect(DB_PATH)
+    conn.execute(
+        "INSERT OR IGNORE INTO unlocks (username, project_index) VALUES (?, ?)",
+        (username, project_index)
+    )
+    conn.commit()
+    conn.close()
+
+def get_unlocked_set(username: str) -> set:
+    conn = sqlite3.connect(DB_PATH)
+    cur  = conn.cursor()
+    cur.execute("SELECT project_index FROM unlocks WHERE username=?", (username,))
+    result = {row[0] for row in cur.fetchall()}
+    conn.close()
+    return result
 
 # ─── Auth helpers ────────────────────────────────────────────────
 
@@ -149,8 +196,11 @@ def me():
 @login_required
 def api_projects():
     try:
-        projects = load_projects()
+        username   = session.get("username", "")
+        projects   = load_projects()
         graph_nums = available_graph_numbers()
+        unlocked   = get_unlocked_set(username)
+
         result = []
         for i, p in enumerate(projects):
             result.append({
@@ -159,14 +209,34 @@ def api_projects():
                 "project_district": p.get("project_district", ""),
                 "project_type":     p.get("project_type", ""),
                 "has_graph":        (i + 1) in graph_nums,
+                "is_locked":        i not in unlocked,
             })
         return jsonify({"projects": result, "total": len(result)})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+
+@app.route("/api/project_free/<int:index>")
+@login_required
+def api_project_free(index):
+    """Return only the Excel data (free tier — no lock check)."""
+    try:
+        projects = load_projects()
+        if index < 0 or index >= len(projects):
+            return jsonify({"error": "Project not found"}), 404
+        return jsonify({"project": projects[index]})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 @app.route("/api/project/<int:index>")
 @login_required
 def api_project(index):
+    """Return full detail (Excel + graph) — only if this user has paid for this project."""
+    username = session.get("username", "")
+    if not is_unlocked(username, index):
+        return jsonify({"error": "Payment required", "locked": True}), 402
+
     try:
         projects = load_projects()
         if index < 0 or index >= len(projects):
@@ -176,6 +246,25 @@ def api_project(index):
         return jsonify({"project": project, "graph": graph})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/unlock_manual", methods=["POST"])
+@login_required
+def unlock_manual():
+    """
+    Called after successful Razorpay payment to permanently unlock
+    a specific project for the logged-in user.
+    """
+    username = session.get("username", "")
+    data     = request.get_json()
+    idx      = data.get("project_index")
+
+    if idx is None:
+        return jsonify({"ok": False, "error": "Missing project_index"}), 400
+
+    unlock_project(username, int(idx))
+    return jsonify({"ok": True})
+
 
 # ─── Serve frontend ──────────────────────────────────────────────
 
@@ -189,7 +278,8 @@ def index():
 if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument("--host", default="127.0.0.1", help="Host to bind (use 0.0.0.0 for network access)")
+    parser.add_argument("--host", default="127.0.0.1",
+                        help="Host to bind (use 0.0.0.0 for network access)")
     args = parser.parse_args()
     print(f"\n  Property Index Explorer running → http://{args.host}:{PORT}")
     print(f"  Excel  : {EXCEL_PATH}")

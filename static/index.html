@@ -145,13 +145,14 @@ body{background:var(--bg);color:var(--text);font-family:'Karla',sans-serif;font-
 .project-display { display:none; }
 .project-display.visible { display:block; animation:fadeIn .3s ease; }
 @keyframes fadeIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
-.proj-header { background:var(--white); border:1px solid var(--border); border-left:4px solid var(--accent); border-radius:12px; padding:24px 28px; margin-bottom:16px; box-shadow:var(--shadow); display:flex; align-items:flex-start; justify-content:space-between; gap:20px; flex-wrap:wrap; }
-.proj-header-left { flex:1; min-width:200px; }
-.proj-title { font-family:'Playfair Display',serif; font-size:clamp(20px,3vw,30px); font-weight:900; letter-spacing:-.02em; color:var(--text); line-height:1.15; margin-bottom:6px; }
-.proj-building { font-size:13px; color:var(--muted); margin-bottom:10px; }
-.proj-tags { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-top:10px; }
+.proj-header-row { display:flex; gap:16px; margin-bottom:16px; align-items:stretch; flex-wrap:wrap; }
+.proj-header { background:var(--white); border:1px solid var(--border); border-left:4px solid var(--accent); border-radius:12px; padding:22px 26px; box-shadow:var(--shadow); flex:2; min-width:260px; }
+.proj-header-left { width:100%; }
+.proj-title { font-family:'Playfair Display',serif; font-size:clamp(17px,2.2vw,24px); font-weight:900; letter-spacing:-.02em; color:var(--text); line-height:1.2; margin-bottom:5px; }
+.proj-building { font-size:13px; color:var(--muted); margin-bottom:8px; }
+.proj-tags { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-top:8px; }
 .proj-tag { font-size:12px; color:var(--muted); display:flex; align-items:center; gap:4px; }
-.proj-header-right { text-align:right; flex-shrink:0; }
+.proj-coords-card { background:var(--white); border:1px solid var(--border); border-left:4px solid var(--accent2); border-radius:12px; padding:22px 26px; box-shadow:var(--shadow); flex:1; min-width:200px; display:flex; flex-direction:column; justify-content:space-between; }
 
 /* Grid & Cards */
 .grid { display:grid; grid-template-columns:repeat(12,1fr); gap:16px; }
@@ -234,6 +235,99 @@ body{background:var(--bg);color:var(--text);font-family:'Karla',sans-serif;font-
 .cell-hl-rent{ background:var(--rent-light); }
 
 footer{text-align:center;font-size:11px;color:var(--muted2);letter-spacing:.05em;padding:32px 0 20px}
+
+/* ══════════════ LOCK / PAYMENT WALL ══════════════ */
+.lock-badge {
+  display:inline-flex; align-items:center; gap:4px;
+  font-size:10px; font-weight:700; padding:2px 7px; border-radius:3px;
+  letter-spacing:.04em; flex-shrink:0;
+}
+.lock-badge.locked   { background:#ffeaea; color:#c0392b; border:1px solid #f5c6c2; }
+.lock-badge.unlocked { background:var(--accent2-light); color:var(--accent2); border:1px solid #a8dfc8; }
+
+.payment-wall {
+  background: linear-gradient(135deg, #f8f4ff 0%, #eef4fc 100%);
+  border: 1.5px solid #c8b8e8;
+  border-radius: 14px;
+  padding: 40px 32px;
+  text-align: center;
+  margin-top: 24px;
+  box-shadow: 0 4px 20px rgba(110,53,171,.10);
+  position: relative;
+  overflow: hidden;
+}
+.payment-wall::before {
+  content:"";
+  position:absolute; inset:0;
+  background: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 20px,
+    rgba(110,53,171,.03) 20px,
+    rgba(110,53,171,.03) 40px
+  );
+  pointer-events:none;
+}
+.payment-wall-icon { font-size:44px; margin-bottom:14px; display:block; filter:drop-shadow(0 2px 8px rgba(110,53,171,.18)); }
+.payment-wall h3 {
+  font-family:'Playfair Display',serif; font-size:22px; font-weight:900;
+  color:var(--text); margin-bottom:8px;
+}
+.payment-wall p { font-size:14px; color:var(--muted); line-height:1.6; max-width:420px; margin:0 auto 24px; }
+.payment-wall-features {
+  display:flex; justify-content:center; gap:24px; flex-wrap:wrap;
+  margin-bottom:28px;
+}
+.payment-wall-feature {
+  display:flex; align-items:center; gap:7px;
+  font-size:13px; font-weight:600; color:var(--text2);
+  background:white; border:1px solid var(--border); border-radius:8px;
+  padding:9px 14px; box-shadow:var(--shadow-sm);
+}
+.pay-btn {
+  display:inline-flex; align-items:center; gap:8px;
+  background: linear-gradient(135deg, #6e35ab, #4a1a8c);
+  color:white; border:none; border-radius:10px;
+  padding:14px 32px; font-family:'Karla',sans-serif; font-size:15px; font-weight:700;
+  cursor:pointer; transition:all .18s; box-shadow:0 4px 18px rgba(110,53,171,.28);
+  letter-spacing:.02em;
+}
+.pay-btn:hover  { transform:translateY(-1px); box-shadow:0 6px 24px rgba(110,53,171,.36); }
+.pay-btn:active { transform:scale(.97); }
+.pay-btn:disabled { background:#aaa; cursor:not-allowed; transform:none; box-shadow:none; }
+.payment-note {
+  font-size:11px; color:var(--muted2); margin-top:14px;
+  display:flex; align-items:center; justify-content:center; gap:5px;
+}
+
+/* Payment confirm modal */
+.modal-overlay {
+  position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:1000;
+  display:flex; align-items:center; justify-content:center; padding:20px;
+  animation:fadeOverlay .2s ease;
+}
+@keyframes fadeOverlay { from{opacity:0} to{opacity:1} }
+.modal-box {
+  background:white; border-radius:16px; padding:36px 32px;
+  max-width:440px; width:100%; box-shadow:0 20px 60px rgba(0,0,0,.25);
+  animation:slideUp .25s ease;
+}
+@keyframes slideUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+.modal-box h3 { font-family:'Playfair Display',serif; font-size:20px; font-weight:900; margin-bottom:10px; color:var(--text); }
+.modal-box p  { font-size:13px; color:var(--muted); line-height:1.6; margin-bottom:24px; }
+.modal-actions { display:flex; gap:10px; }
+.modal-btn-cancel {
+  flex:1; background:var(--bg2); border:1.5px solid var(--border2); border-radius:8px;
+  padding:12px; font-family:'Karla',sans-serif; font-size:13px; font-weight:600;
+  color:var(--muted); cursor:pointer; transition:all .15s;
+}
+.modal-btn-cancel:hover { background:var(--border2); color:var(--text); }
+.modal-btn-confirm {
+  flex:2; background:linear-gradient(135deg,#6e35ab,#4a1a8c); color:white; border:none;
+  border-radius:8px; padding:12px; font-family:'Karla',sans-serif; font-size:13px; font-weight:700;
+  cursor:pointer; transition:all .15s; box-shadow:0 3px 12px rgba(110,53,171,.3);
+}
+.modal-btn-confirm:hover { transform:translateY(-1px); }
 </style>
 </head>
 <body>
@@ -362,6 +456,7 @@ footer{text-align:center;font-size:11px;color:var(--muted2);letter-spacing:.05em
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script>
 // ════════════════════════════════════════════════════════
 //  STATE
@@ -372,11 +467,22 @@ let currentProject  = null;    // { project, graph, index } – last fetched
 let towerChart      = null;
 let priceChart      = null;
 
+// ── Payment config ──
+// Set your Razorpay payment link here:
+const RAZORPAY_PAYMENT_LINK = "https://rzp.io/rzp/NEeyCNKr"; // <-- Replace with your link
+const UNLOCK_PRICE_LABEL    = "₹99";  // shown on the payment wall button
+
 function setMode(mode) {
   currentMode = mode;
   document.getElementById("btnBuy").className  = "mode-btn" + (mode === "buy"  ? " active-buy"  : "");
   document.getElementById("btnRent").className = "mode-btn" + (mode === "rent" ? " active-rent" : "");
-  if (currentProject) renderProject(currentProject.project, currentProject.graph, currentProject.index);
+  if (currentProject) {
+    if (currentProject.locked) {
+      renderProjectFree(currentProject.project, currentProject.index);
+    } else {
+      renderProject(currentProject.project, currentProject.graph, currentProject.index);
+    }
+  }
 }
 
 // ════════════════════════════════════════════════════════
@@ -615,6 +721,9 @@ function renderDropList() {
       <span class="opt-name">${p.project_name || "Untitled"}</span>
       <span class="opt-meta">${p.project_district || ""}</span>
       ${p.has_graph ? '<span class="opt-badge">📊 Graph</span>' : ""}
+      ${p.is_locked
+        ? '<span class="lock-badge locked">🔒 Locked</span>'
+        : '<span class="lock-badge unlocked">✅ Unlocked</span>'}
     </div>`
   ).join("");
 }
@@ -630,11 +739,227 @@ async function selectProject(index) {
   document.getElementById("selectLabel").textContent = proj.project_name || "Untitled";
   document.getElementById("selectLabel").style.color = "";
 
-  const res  = await fetch(`/api/project/${index}`);
+  if (proj.is_locked) {
+    // ── FREE tier: load only Excel data, then show payment wall ──
+    const freeRes = await fetch(`/api/project_free/${index}`);
+    if (freeRes.status === 401) { location.reload(); return; }
+    const freeData = await freeRes.json();
+    currentProject = { project: freeData.project, graph: null, index, locked: true };
+    renderProjectFree(freeData.project, index);
+  } else {
+    // ── PAID: load full data (Excel + graph) ──
+    const res = await fetch(`/api/project/${index}`);
+    if (res.status === 401) { location.reload(); return; }
+    if (res.status === 402) {
+      // Race: became locked again? Reload project list
+      await refreshProjects();
+      selectProject(index);
+      return;
+    }
+    const data = await res.json();
+    currentProject = { project: data.project, graph: data.graph, index, locked: false };
+    renderProject(data.project, data.graph, index);
+  }
+}
+
+async function refreshProjects() {
+  const res  = await fetch("/api/projects");
   if (res.status === 401) { location.reload(); return; }
   const data = await res.json();
-  currentProject = { project: data.project, graph: data.graph, index };
-  renderProject(data.project, data.graph, index);
+  ALL_PROJECTS = data.projects;
+  renderDropList();
+}
+
+// ── Render free (Excel only) view + payment wall below coordinates ──
+function renderProjectFree(project, index) {
+  const display = document.getElementById("projectDisplay");
+  display.className = "project-display visible";
+
+  const isBuy = currentMode === "buy";
+  const lat = v(project,"project_latitude");
+  const lng = v(project,"project_longitude");
+  const mapsUrl = (lat && lng && lat !== "0" && lng !== "0")
+    ? `https://maps.google.com/?q=${lat},${lng}` : "";
+
+  const areaVals = AREA_DEFS.map(([k]) => parseFloat(v(project,k)) || 0);
+  const maxArea  = Math.max(...areaVals, 1);
+  const extraCols = Object.keys(project).filter(k => !KNOWN_COLS.has(k) && v(project,k));
+  const modePillHtml = `<div class="mode-pill ${isBuy ? "buy" : "rent"}">
+    ${isBuy ? "🏠 Showing Buying Prices" : "🔑 Showing Renting Prices"}
+  </div>`;
+
+  display.innerHTML = `
+    ${modePillHtml}
+    <div class="proj-header-row">
+      <div class="proj-header">
+        <div class="proj-header-left">
+          <div class="proj-title">${v(project,"project_name") || "Untitled Project"}</div>
+          <div class="proj-building">${v(project,"project_building_name")}</div>
+          <div class="proj-tags">
+            ${badgeHtml(v(project,"project_type"))}
+            <span class="proj-tag">📍 ${v(project,"project_locality")}, ${v(project,"project_district")}</span>
+            <span class="proj-tag">📮 ${v(project,"project_pin_code")}</span>
+            <span class="lock-badge locked" style="font-size:11px;padding:3px 10px">🔒 Premium Content Locked</span>
+          </div>
+        </div>
+      </div>
+      <div class="proj-coords-card">
+        <div>
+          <div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:12px">🗺️ Coordinates</div>
+          <div class="coords-display">
+            <span><span>Latitude</span><b>${lat||"—"}</b></span>
+            <span><span>Longitude</span><b>${lng||"—"}</b></span>
+          </div>
+        </div>
+        ${mapsUrl
+          ? `<a class="map-cta" href="${mapsUrl}" target="_blank">📍 Open in Google Maps</a>`
+          : '<div style="font-size:12px;color:var(--muted2);text-align:center;margin-top:12px">No coordinates available</div>'}
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="card col-6">
+        <div class="card-head">📍 Location Details</div>
+        <div class="field"><span class="field-k">Street</span>${fv(v(project,"project_street_name"))}</div>
+        <div class="field"><span class="field-k">Locality</span>${fvC(v(project,"project_locality"),"blue")}</div>
+        <div class="field"><span class="field-k">Landmark</span>${fv(v(project,"project_landmark"))}</div>
+        <div class="field"><span class="field-k">Village</span>${fv(v(project,"project_village"))}</div>
+        <div class="field"><span class="field-k">Taluka</span>${fv(v(project,"project_taluka"))}</div>
+        <div class="field"><span class="field-k">District</span>${fvC(v(project,"project_district"),"blue")}</div>
+        <div class="field"><span class="field-k">State</span>${fv(v(project,"project_state/ut"))}</div>
+        <div class="field"><span class="field-k">PIN Code</span>${fv(v(project,"project_pin_code"))}</div>
+      </div>
+      <div class="card col-6">
+        <div class="card-head">📅 Registration & Timeline</div>
+        <div class="field"><span class="field-k">Project Type</span>${fv(v(project,"project_type"))}</div>
+        <div class="field"><span class="field-k">Plot / Survey No.</span>${fv(v(project,"final_plot_bearing_no/cts_number/survey_number"))}</div>
+        <div class="field"><span class="field-k">Original Completion</span>${fvC(v(project,"proposed_completion_date_original"),"orange")}</div>
+        <div class="field"><span class="field-k">Revised Completion</span>${fvC(v(project,"proposed_completion_date_revised"),"orange")}</div>
+        <div class="field"><span class="field-k">Public Authority</span>${fv(v(project,"project_affiliated_public_authority_name"))}</div>
+      </div>
+      <div class="card col-8">
+        <div class="card-head">📐 Area Breakdown</div>
+        ${AREA_DEFS.map(([k,label,color],i) => areaBar(label, areaVals[i], maxArea, color)).join("")}
+      </div>
+      <div class="card col-4">
+        <div class="card-head">🧭 Site Boundaries</div>
+        <div class="compass">
+          <div class="compass-cell"><div class="compass-dir">North</div><div class="compass-val">${v(project,"project_boundaries_north")||"—"}</div></div>
+          <div class="compass-cell"><div class="compass-dir">South</div><div class="compass-val">${v(project,"project_boundaries_south")||"—"}</div></div>
+          <div class="compass-cell"><div class="compass-dir">East</div><div class="compass-val">${v(project,"project_boundaries_east")||"—"}</div></div>
+          <div class="compass-cell"><div class="compass-dir">West</div><div class="compass-val">${v(project,"project_boundaries_west")||"—"}</div></div>
+        </div>
+      </div>
+      ${extraCols.length ? `
+      <div class="card col-12">
+        <div class="card-head">📋 Additional Details</div>
+        ${extraCols.map(k => `<div class="field"><span class="field-k">${k.replace(/_/g," ")}</span>${fv(v(project,k))}</div>`).join("")}
+      </div>` : ""}
+    </div>
+
+    <!-- ══ PAYMENT WALL ══ -->
+    <div class="payment-wall" id="paymentWall">
+      <span class="payment-wall-icon">🔒</span>
+      <h3>Unlock Premium Analytics</h3>
+      <p>Pay once to permanently unlock full price analytics, floor-wise charts, flat inventory, and detailed pricing data for <strong>${v(project,"project_name") || "this project"}</strong>.</p>
+      <div class="payment-wall-features">
+        <div class="payment-wall-feature">📊 Price Charts</div>
+        <div class="payment-wall-feature">🏗️ Tower Distribution</div>
+        <div class="payment-wall-feature">📋 Flat Inventory</div>
+        <div class="payment-wall-feature">💰 Floor-wise Pricing</div>
+      </div>
+      <button class="pay-btn" id="payBtn" onclick="initiatePayment(${index})">
+        🔓 Unlock for ${UNLOCK_PRICE_LABEL}
+      </button>
+      <div class="payment-note">🔐 Secure payment via Razorpay · Unlocked permanently for your account</div>
+    </div>
+  `;
+
+  setTimeout(() => {
+    document.querySelectorAll(".area-fill").forEach(el => {
+      const w = el.style.width; el.style.width = "0";
+      setTimeout(() => el.style.width = w, 60);
+    });
+  }, 80);
+}
+
+// ── Payment initiation ──
+function initiatePayment(projectIndex) {
+  const btn = document.getElementById("payBtn");
+  if (btn) btn.disabled = true;
+
+  // Open payment link in new tab
+  window.open(RAZORPAY_PAYMENT_LINK, "_blank");
+
+  // Show confirmation modal
+  showPaymentConfirmModal(projectIndex);
+}
+
+function showPaymentConfirmModal(projectIndex) {
+  const existing = document.getElementById("paymentModal");
+  if (existing) existing.remove();
+
+  const modal = document.createElement("div");
+  modal.id = "paymentModal";
+  modal.className = "modal-overlay";
+  modal.innerHTML = `
+    <div class="modal-box">
+      <h3>🎉 Complete Your Payment</h3>
+      <p>A payment page has been opened in a new tab.<br><br>
+      Once you've completed the payment, click <strong>"I've Paid — Unlock Now"</strong> below to unlock this project for your account.</p>
+      <div class="modal-actions">
+        <button class="modal-btn-cancel" onclick="cancelPaymentModal(${projectIndex})">Cancel</button>
+        <button class="modal-btn-confirm" onclick="confirmPaymentAndUnlock(${projectIndex})">
+          ✅ I've Paid — Unlock Now
+        </button>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+}
+
+function cancelPaymentModal(projectIndex) {
+  const modal = document.getElementById("paymentModal");
+  if (modal) modal.remove();
+  // Re-enable the pay button
+  const btn = document.getElementById("payBtn");
+  if (btn) btn.disabled = false;
+}
+
+async function confirmPaymentAndUnlock(projectIndex) {
+  const modal = document.getElementById("paymentModal");
+  if (modal) {
+    modal.querySelector(".modal-btn-confirm").disabled = true;
+    modal.querySelector(".modal-btn-confirm").textContent = "Unlocking…";
+  }
+
+  try {
+    const res = await fetch("/api/unlock_manual", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ project_index: projectIndex })
+    });
+
+    if (res.ok) {
+      if (modal) modal.remove();
+      // Update the local project list to mark as unlocked
+      if (ALL_PROJECTS[projectIndex]) {
+        ALL_PROJECTS[projectIndex].is_locked = false;
+      }
+      renderDropList();
+      // Now load the full project
+      const fullRes = await fetch(`/api/project/${projectIndex}`);
+      if (fullRes.status === 401) { location.reload(); return; }
+      const data = await fullRes.json();
+      currentProject = { project: data.project, graph: data.graph, index: projectIndex, locked: false };
+      renderProject(data.project, data.graph, projectIndex);
+    } else {
+      alert("Could not unlock project. Please contact support.");
+      if (modal) modal.remove();
+    }
+  } catch (e) {
+    alert("Network error. Please try again.");
+    if (modal) modal.remove();
+  }
 }
 
 let dropBound = false;
@@ -733,6 +1058,13 @@ const KNOWN_COLS = new Set([
 ]);
 
 function renderProject(project, graph, index) {
+  // Update state so setMode works correctly
+  if (!currentProject || currentProject.index !== index) {
+    currentProject = { project, graph, index, locked: false };
+  } else {
+    currentProject.locked = false;
+  }
+
   const display = document.getElementById("projectDisplay");
   display.className = "project-display visible";
 
@@ -788,19 +1120,29 @@ function renderProject(project, graph, index) {
 
   display.innerHTML = `
     ${modePillHtml}
-    <div class="proj-header">
-      <div class="proj-header-left">
-        <div class="proj-title">${v(project,"project_name") || "Untitled Project"}</div>
-        <div class="proj-building">${v(project,"project_building_name")}</div>
-        <div class="proj-tags">
-          ${badgeHtml(v(project,"project_type"))}
-          <span class="proj-tag">📍 ${v(project,"project_locality")}, ${v(project,"project_district")}</span>
-          <span class="proj-tag">📮 ${v(project,"project_pin_code")}</span>
+    <div class="proj-header-row">
+      <div class="proj-header">
+        <div class="proj-header-left">
+          <div class="proj-title">${v(project,"project_name") || "Untitled Project"}</div>
+          <div class="proj-building">${v(project,"project_building_name")}</div>
+          <div class="proj-tags">
+            ${badgeHtml(v(project,"project_type"))}
+            <span class="proj-tag">📍 ${v(project,"project_locality")}, ${v(project,"project_district")}</span>
+            <span class="proj-tag">📮 ${v(project,"project_pin_code")}</span>
+          </div>
         </div>
       </div>
-      <div class="proj-header-right">
-        <div class="stat-num" style="font-family:Karla;font-size:16px">${v(project,"project_district")||"—"}</div>
-        <div class="stat-label">${v(project,"project_taluka")}</div>
+      <div class="proj-coords-card">
+        <div>
+          <div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:12px">🗺️ Coordinates</div>
+          <div class="coords-display">
+            <span><span>Latitude</span><b>${lat||"—"}</b></span>
+            <span><span>Longitude</span><b>${lng||"—"}</b></span>
+          </div>
+        </div>
+        ${mapsUrl
+          ? `<a class="map-cta" href="${mapsUrl}" target="_blank">📍 Open in Google Maps</a>`
+          : '<div style="font-size:12px;color:var(--muted2);text-align:center;margin-top:12px">No coordinates available</div>'}
       </div>
     </div>
 
@@ -837,16 +1179,6 @@ function renderProject(project, graph, index) {
           <div class="compass-cell"><div class="compass-dir">East</div><div class="compass-val">${v(project,"project_boundaries_east")||"—"}</div></div>
           <div class="compass-cell"><div class="compass-dir">West</div><div class="compass-val">${v(project,"project_boundaries_west")||"—"}</div></div>
         </div>
-      </div>
-      <div class="card col-4">
-        <div class="card-head">🗺️ Coordinates</div>
-        <div class="coords-display">
-          <span><span>Latitude</span><b>${lat||"—"}</b></span>
-          <span><span>Longitude</span><b>${lng||"—"}</b></span>
-        </div>
-        ${mapsUrl
-          ? `<a class="map-cta" href="${mapsUrl}" target="_blank">📍 Open in Google Maps</a>`
-          : '<div style="font-size:12px;color:var(--muted2);text-align:center;margin-top:12px">No coordinates available</div>'}
       </div>
       <!--
         <div class="card col-8">
