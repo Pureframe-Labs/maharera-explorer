@@ -278,7 +278,7 @@ def index():
 if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument("--host", default="127.0.0.1",
+    parser.add_argument("--host", default="0.0.0.0",
                         help="Host to bind (use 0.0.0.0 for network access)")
     args = parser.parse_args()
     print(f"\n  Property Index Explorer running → http://{args.host}:{PORT}")
