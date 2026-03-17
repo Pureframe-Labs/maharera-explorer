@@ -60,9 +60,18 @@ body{background:var(--bg);color:var(--text);font-family:'Karla',sans-serif;font-
 .login-btn:disabled { background:var(--muted2); cursor:not-allowed; transform:none; }
 .login-error { background:var(--warn-light); border:1px solid #f0c4aa; border-radius:8px; padding:11px 14px; font-size:13px; color:var(--warn); margin-bottom:16px; display:none; }
 .login-error.show { display:block; }
+.login-success { background:#e8f5e9; border:1px solid #a5d6a7; border-radius:8px; padding:14px 16px; font-size:13px; color:#2e7d32; margin-bottom:16px; display:none; line-height:1.6; }
+.login-success.show { display:block; }
 .auth-switch { margin-top:18px; text-align:center; font-size:13px; color:var(--muted); }
 .auth-switch a { color:var(--accent); font-weight:600; text-decoration:none; }
 .auth-switch a:hover { text-decoration:underline; }
+.pw-hint { font-size:11px; color:var(--muted); margin-top:5px; line-height:1.5; }
+.pw-strength { height:3px; border-radius:2px; margin-top:7px; background:var(--border2); overflow:hidden; }
+.pw-strength-bar { height:100%; width:0%; border-radius:2px; transition:width .25s, background .25s; }
+.input-hint-row { display:flex; align-items:center; gap:6px; margin-top:5px; }
+.hint-chip { font-size:10px; padding:2px 8px; border-radius:20px; font-weight:600; letter-spacing:.03em; }
+.hint-chip.pass { background:#e8f5e9; color:#2e7d32; }
+.hint-chip.fail { background:#fce4ec; color:#c62828; }
 
 /* ══════════════ APP ══════════════ */
 #appPage { display:none; }
@@ -77,6 +86,51 @@ body{background:var(--bg);color:var(--text);font-family:'Karla',sans-serif;font-
 .topbar-label { font-size:12px; color:rgba(255,255,255,0.65); font-weight:500; letter-spacing:.04em; }
 .logout-btn { background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.25); border-radius:7px; padding:6px 14px; font-family:'Karla',sans-serif; font-size:12px; font-weight:600; color:rgba(255,255,255,0.85); cursor:pointer; transition:all .15s; }
 .logout-btn:hover { background:rgba(255,255,255,0.22); color:white; }
+.profile-btn { background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.3); border-radius:7px; padding:6px 14px; font-family:'Karla',sans-serif; font-size:12px; font-weight:600; color:white; cursor:pointer; transition:all .15s; display:flex; align-items:center; gap:6px; }
+.profile-btn:hover { background:rgba(255,255,255,0.25); }
+.side-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:500; opacity:0; pointer-events:none; transition:opacity .25s; }
+.side-overlay.open { opacity:1; pointer-events:all; }
+.side-panel { position:fixed; top:0; right:0; width:360px; max-width:95vw; height:100vh; background:var(--white); z-index:501; box-shadow:-8px 0 40px rgba(0,0,0,0.18); transform:translateX(100%); transition:transform .28s cubic-bezier(.4,0,.2,1); display:flex; flex-direction:column; }
+.side-panel.open { transform:translateX(0); }
+.side-panel-header { background:var(--accent); padding:20px 22px; display:flex; align-items:center; justify-content:space-between; flex-shrink:0; }
+.side-panel-header h2 { font-family:'Playfair Display',serif; font-size:18px; font-weight:900; color:white; }
+.side-close { background:none; border:none; color:rgba(255,255,255,0.8); font-size:22px; cursor:pointer; line-height:1; padding:4px; }
+.side-close:hover { color:white; }
+.side-tabs { display:flex; border-bottom:2px solid var(--border); flex-shrink:0; }
+.side-tab { flex:1; padding:13px 8px; font-size:13px; font-weight:600; color:var(--muted); cursor:pointer; border:none; background:none; border-bottom:3px solid transparent; margin-bottom:-2px; transition:all .15s; font-family:'Karla',sans-serif; }
+.side-tab.active { color:var(--accent); border-bottom-color:var(--accent); }
+.side-tab:hover:not(.active) { color:var(--text); background:var(--surface); }
+.side-body { flex:1; overflow-y:auto; padding:24px 22px; }
+.profile-avatar { width:64px; height:64px; background:var(--accent); border-radius:50%; display:flex; align-items:center; justify-content:center; font-family:'Playfair Display',serif; font-size:26px; font-weight:900; color:white; margin:0 auto 18px; }
+.profile-email-row { text-align:center; margin-bottom:24px; }
+.profile-email-row .email-val { font-size:14px; color:var(--muted); }
+.profile-email-row .verified-badge { display:inline-block; background:#e8f5e9; color:#2e7d32; font-size:11px; font-weight:700; border-radius:20px; padding:2px 10px; margin-left:8px; }
+.profile-field { margin-bottom:18px; }
+.profile-field label { display:block; font-size:11px; font-weight:700; letter-spacing:.09em; text-transform:uppercase; color:var(--muted); margin-bottom:7px; }
+.profile-field input { width:100%; border:1.5px solid var(--border2); border-radius:9px; padding:11px 14px; font-family:'Karla',sans-serif; font-size:14px; color:var(--text); outline:none; transition:border-color .15s; }
+.profile-field input:focus { border-color:var(--accent); box-shadow:0 0 0 3px rgba(42,92,170,.1); }
+.profile-field input:disabled { background:var(--surface); color:var(--muted); cursor:not-allowed; }
+.profile-field .locked-note { font-size:11px; color:var(--muted2); margin-top:5px; }
+.profile-save-btn { width:100%; background:var(--accent); color:white; border:none; border-radius:9px; padding:12px; font-family:'Karla',sans-serif; font-size:14px; font-weight:700; cursor:pointer; transition:background .15s; margin-top:8px; }
+.profile-save-btn:hover { background:#1e4a90; }
+.profile-save-btn:disabled { background:var(--muted2); cursor:not-allowed; }
+.profile-msg { font-size:13px; padding:10px 14px; border-radius:8px; margin-top:12px; display:none; }
+.profile-msg.ok  { background:#e8f5e9; color:#2e7d32; display:block; }
+.profile-msg.err { background:var(--warn-light); color:var(--warn); display:block; }
+.unlock-card { border:1.5px solid var(--border); border-radius:10px; padding:14px 16px; margin-bottom:12px; background:var(--surface); }
+.unlock-card-name { font-size:14px; font-weight:700; color:var(--text); margin-bottom:6px; line-height:1.3; }
+.unlock-days-bar-wrap { display:flex; align-items:center; gap:10px; margin-top:8px; }
+.unlock-days-bar-bg { flex:1; height:6px; background:var(--border); border-radius:3px; overflow:hidden; }
+.unlock-days-bar { height:100%; border-radius:3px; transition:width .4s; }
+.unlock-days-label { font-size:12px; font-weight:700; white-space:nowrap; }
+.unlock-empty { text-align:center; padding:40px 20px; color:var(--muted); }
+.unlock-empty .empty-icon { font-size:36px; margin-bottom:12px; }
+.unlock-empty p { font-size:13px; line-height:1.6; }
+.google-btn { width:100%; background:white; border:1.5px solid var(--border2); border-radius:9px; padding:12px 16px; font-family:'Karla',sans-serif; font-size:14px; font-weight:600; color:var(--text); cursor:pointer; display:flex; align-items:center; justify-content:center; gap:10px; transition:border-color .15s, box-shadow .15s; margin-bottom:16px; }
+.google-btn:hover { border-color:var(--accent); box-shadow:0 0 0 3px rgba(42,92,170,.08); }
+.google-btn svg { width:18px; height:18px; flex-shrink:0; }
+.or-divider { display:flex; align-items:center; gap:10px; margin-bottom:16px; color:var(--muted2); font-size:12px; font-weight:600; letter-spacing:.05em; }
+.or-divider::before,.or-divider::after { content:''; flex:1; height:1px; background:var(--border); }
 
 /* Hero */
 .hero { background:var(--white); border-bottom:2px solid var(--border); padding:48px 40px 36px; }
@@ -347,9 +401,14 @@ footer{text-align:center;font-size:11px;color:var(--muted2);letter-spacing:.05em
       <h2>Sign in</h2>
       <p class="sub">Access the Property Index Project Explorer.<br>Enter your credentials to continue.</p>
       <div class="login-error" id="loginError"></div>
+      <button class="google-btn" onclick="doGoogleLogin()">
+        <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/><path fill="none" d="M0 0h48v48H0z"/></svg>
+        Continue with Google
+      </button>
+      <div class="or-divider">OR</div>
       <div class="field-group">
-        <label>Username</label>
-        <input type="text" id="loginUser" placeholder="Enter username" autocomplete="username" />
+        <label>Email Address</label>
+        <input type="email" id="loginEmail" placeholder="you@example.com" autocomplete="email" />
       </div>
       <div class="field-group">
         <label>Password</label>
@@ -362,19 +421,38 @@ footer{text-align:center;font-size:11px;color:var(--muted2);letter-spacing:.05em
     <!-- ── Sign Up panel ── -->
     <div id="signupPanel" style="display:none">
       <h2>Create account</h2>
-      <p class="sub">Join Property Index Project Explorer.<br>Pick a username and password to get started.</p>
-      <div class="login-error" id="signupError"></div>
+      <p class="sub">Join Property Index Project Explorer.<br>Fill in your details to get started.</p>
+      <div class="login-error"   id="signupError"></div>
+      <div class="login-success" id="signupSuccess"></div>
       <div class="field-group">
         <label>Full Name</label>
         <input type="text" id="signupName" placeholder="Your full name" autocomplete="name" />
       </div>
       <div class="field-group">
-        <label>Username</label>
-        <input type="text" id="signupUser" placeholder="Choose a username" autocomplete="username" />
+        <label>Email Address</label>
+        <input type="email" id="signupEmail" placeholder="you@example.com" autocomplete="email" />
+      </div>
+      <div class="field-group">
+        <label>Phone Number</label>
+        <input type="tel" id="signupPhone" placeholder="10-digit mobile number" autocomplete="tel" maxlength="10" oninput="this.value=this.value.replace(/[^0-9]/g,'')" />
       </div>
       <div class="field-group">
         <label>Password</label>
-        <input type="password" id="signupPass" placeholder="At least 6 characters" autocomplete="new-password" />
+        <input type="password" id="signupPass" placeholder="Min 6 chars · letters + numbers + symbol" autocomplete="new-password" oninput="updatePwStrength(this.value)" />
+        <div class="pw-strength"><div class="pw-strength-bar" id="pwBar"></div></div>
+        <div class="input-hint-row" id="pwHints">
+          <span class="hint-chip fail" id="hLen">6+ chars</span>
+          <span class="hint-chip fail" id="hNum">number</span>
+          <span class="hint-chip fail" id="hSym">symbol</span>
+          <span class="hint-chip fail" id="hAlpha">letter</span>
+        </div>
+      </div>
+      <div class="field-group">
+        <label>Confirm Password</label>
+        <input type="password" id="signupPassConfirm" placeholder="Re-enter your password" autocomplete="new-password" oninput="checkConfirm()" />
+        <div class="input-hint-row" id="confirmHint" style="display:none">
+          <span class="hint-chip" id="hMatch">passwords match</span>
+        </div>
       </div>
       <button class="login-btn" id="signupBtn" onclick="doSignup()">Create Account →</button>
       <p class="auth-switch">Already have an account? <a href="#" onclick="showSignin();return false;">Sign in</a></p>
@@ -394,7 +472,8 @@ footer{text-align:center;font-size:11px;color:var(--muted2);letter-spacing:.05em
       <div class="logo-text">Property Index</div>
     </div>
     <div class="topbar-right">
-      <span class="topbar-label" id="topbarUser"></span>
+      <button class="profile-btn" onclick="openSidePanel('profile')">&#128100; <span id="topbarUser"></span></button>
+      <button class="profile-btn" onclick="openSidePanel('unlocks')">&#128275; My Unlocks</button>
       <button class="logout-btn" onclick="doLogout()">Sign out</button>
     </div>
   </div>
@@ -455,6 +534,20 @@ footer{text-align:center;font-size:11px;color:var(--muted2);letter-spacing:.05em
   </div>
 </div>
 
+<!-- SIDE PANEL -->
+<div class="side-overlay" id="sideOverlay" onclick="closeSidePanel()"></div>
+<div class="side-panel" id="sidePanel">
+  <div class="side-panel-header">
+    <h2 id="sidePanelTitle">My Profile</h2>
+    <button class="side-close" onclick="closeSidePanel()">&#x2715;</button>
+  </div>
+  <div class="side-tabs">
+    <button class="side-tab active" id="tabProfile"  onclick="switchSideTab('profile')">&#128100; Profile</button>
+    <button class="side-tab"        id="tabUnlocks"  onclick="switchSideTab('unlocks')">&#128275; My Unlocks</button>
+  </div>
+  <div class="side-body" id="sideBody"></div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script>
@@ -488,10 +581,35 @@ function setMode(mode) {
 // ════════════════════════════════════════════════════════
 //  AUTH
 // ════════════════════════════════════════════════════════
+
+const SUPABASE_URL_CLIENT = "https://gbojjpasnzevczvyndlx.supabase.co";
+
 async function checkSession() {
+  // Handle Google OAuth redirect (token in URL hash)
+  const hash = window.location.hash;
+  if (hash && hash.includes("access_token")) {
+    const params = new URLSearchParams(hash.substring(1));
+    const accessToken  = params.get("access_token");
+    const refreshToken = params.get("refresh_token") || "";
+    if (accessToken) {
+      history.replaceState(null, "", window.location.pathname);
+      const res = await fetch("/api/google_callback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ access_token: accessToken, refresh_token: refreshToken })
+      });
+      const d = await res.json();
+      if (d.ok) { showApp(d.name); return; }
+    }
+  }
   const res = await fetch("/api/me");
   const d   = await res.json();
   if (d.logged_in) showApp(d.name);
+}
+
+async function doGoogleLogin() {
+  const redirectTo = window.location.origin + window.location.pathname;
+  window.location.href = SUPABASE_URL_CLIENT + "/auth/v1/authorize?provider=google&redirect_to=" + encodeURIComponent(redirectTo);
 }
 
 // ── Panel toggles ──
@@ -506,23 +624,74 @@ function showSignin() {
   clearAuthErrors();
 }
 function clearAuthErrors() {
-  ["loginError","signupError"].forEach(id => {
+  ["loginError","signupError","signupSuccess"].forEach(id => {
     const el = document.getElementById(id);
-    if (el) el.classList.remove("show");
+    if (el) { el.classList.remove("show"); }
   });
-  ["loginUser","loginPass","signupName","signupUser","signupPass"].forEach(id => {
+  ["loginEmail","loginPass","signupName","signupEmail","signupPhone","signupPass","signupPassConfirm"].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.classList.remove("err");
   });
 }
 
+// ── Password strength helpers ──
+function updatePwStrength(val) {
+  const hasLen   = val.length >= 6;
+  const hasNum   = /[0-9]/.test(val);
+  const hasSym   = /[^a-zA-Z0-9]/.test(val);
+  const hasAlpha = /[a-zA-Z]/.test(val);
+  const score    = [hasLen, hasNum, hasSym, hasAlpha].filter(Boolean).length;
+
+  const bar = document.getElementById("pwBar");
+  const colors = ["#ef5350","#ff7043","#ffa726","#66bb6a"];
+  bar.style.width   = (score * 25) + "%";
+  bar.style.background = colors[score - 1] || "#ef5350";
+
+  setChip("hLen",   hasLen);
+  setChip("hNum",   hasNum);
+  setChip("hSym",   hasSym);
+  setChip("hAlpha", hasAlpha);
+  checkConfirm();
+}
+function setChip(id, ok) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.className = "hint-chip " + (ok ? "pass" : "fail");
+}
+function checkConfirm() {
+  const pass    = document.getElementById("signupPass").value;
+  const confirm = document.getElementById("signupPassConfirm").value;
+  const row     = document.getElementById("confirmHint");
+  const chip    = document.getElementById("hMatch");
+  if (!confirm) { row.style.display = "none"; return; }
+  row.style.display = "flex";
+  const match = pass === confirm;
+  chip.className  = "hint-chip " + (match ? "pass" : "fail");
+  chip.textContent = match ? "passwords match" : "passwords don’t match";
+}
+
+function validatePassword(pw) {
+  if (pw.length < 6)          return "Password must be at least 6 characters.";
+  if (!/[a-zA-Z]/.test(pw))   return "Password must contain at least one letter.";
+  if (!/[0-9]/.test(pw))      return "Password must contain at least one number.";
+  if (!/[^a-zA-Z0-9]/.test(pw)) return "Password must contain at least one special character (e.g. @, #, !).";
+  return null;
+}
+
 // ── Login ──
 async function doLogin() {
-  const user = document.getElementById("loginUser").value.trim();
-  const pass = document.getElementById("loginPass").value;
-  const btn  = document.getElementById("loginBtn");
+  const email = document.getElementById("loginEmail").value.trim();
+  const pass  = document.getElementById("loginPass").value;
+  const btn   = document.getElementById("loginBtn");
 
-  if (!user || !pass) { showAuthError("loginError", ["loginUser","loginPass"], "Please enter username and password."); return; }
+  if (!email || !pass) {
+    showAuthError("loginError", ["loginEmail","loginPass"], "Please enter your email and password.");
+    return;
+  }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    showAuthError("loginError", ["loginEmail"], "Please enter a valid email address.");
+    return;
+  }
 
   btn.disabled = true;
   btn.textContent = "Signing in…";
@@ -530,14 +699,14 @@ async function doLogin() {
   const res = await fetch("/api/login", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ username: user, password: pass })
+    body: JSON.stringify({ email, password: pass })
   });
   const d = await res.json();
 
   if (d.ok) {
     showApp(d.name);
   } else {
-    showAuthError("loginError", ["loginUser","loginPass"], d.error || "Invalid username or password.");
+    showAuthError("loginError", ["loginEmail","loginPass"], d.error || "Invalid email or password.");
     btn.disabled = false;
     btn.textContent = "Sign In →";
   }
@@ -545,14 +714,29 @@ async function doLogin() {
 
 // ── Signup ──
 async function doSignup() {
-  const name = document.getElementById("signupName").value.trim();
-  const user = document.getElementById("signupUser").value.trim();
-  const pass = document.getElementById("signupPass").value;
-  const btn  = document.getElementById("signupBtn");
+  const name    = document.getElementById("signupName").value.trim();
+  const email   = document.getElementById("signupEmail").value.trim();
+  const phone   = document.getElementById("signupPhone").value.trim();
+  const pass    = document.getElementById("signupPass").value;
+  const confirm = document.getElementById("signupPassConfirm").value;
+  const btn     = document.getElementById("signupBtn");
 
-  if (!name || !user || !pass) {
-    showAuthError("signupError", ["signupName","signupUser","signupPass"], "Please fill in all fields.");
-    return;
+  // Validations
+  if (!name) {
+    showAuthError("signupError", ["signupName"], "Please enter your full name."); return;
+  }
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    showAuthError("signupError", ["signupEmail"], "Please enter a valid email address."); return;
+  }
+  if (!phone || !/^[6-9][0-9]{9}$/.test(phone)) {
+    showAuthError("signupError", ["signupPhone"], "Please enter a valid 10-digit Indian mobile number (starting with 6–9)."); return;
+  }
+  const pwErr = validatePassword(pass);
+  if (pwErr) {
+    showAuthError("signupError", ["signupPass"], pwErr); return;
+  }
+  if (pass !== confirm) {
+    showAuthError("signupError", ["signupPassConfirm"], "Passwords do not match. Please re-enter."); return;
   }
 
   btn.disabled = true;
@@ -561,14 +745,24 @@ async function doSignup() {
   const res = await fetch("/api/signup", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ name, username: user, password: pass })
+    body: JSON.stringify({ name, email, phone, password: pass })
   });
   const d = await res.json();
 
-  if (d.ok) {
+  if (d.ok && d.pending_verification) {
+    // Show success, hide the form fields, prompt to verify
+    ["signupName","signupEmail","signupPhone","signupPass","signupPassConfirm"].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.closest(".field-group").style.display = "none";
+    });
+    btn.style.display = "none";
+    const suc = document.getElementById("signupSuccess");
+    suc.innerHTML = "✅ <strong>Account created!</strong><br>We’ve sent a verification email to <strong>" + email + "</strong>.<br>Please click the link in that email, then come back and sign in.";
+    suc.classList.add("show");
+  } else if (d.ok) {
     showApp(d.name);
   } else {
-    showAuthError("signupError", ["signupName","signupUser","signupPass"], d.error || "Signup failed. Please try again.");
+    showAuthError("signupError", [], d.error || "Signup failed. Please try again.");
     btn.disabled = false;
     btn.textContent = "Create Account →";
   }
@@ -594,20 +788,151 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("loginPass").addEventListener("keydown", e => {
     if (e.key === "Enter") doLogin();
   });
-  document.getElementById("loginUser").addEventListener("keydown", e => {
+  document.getElementById("loginEmail").addEventListener("keydown", e => {
     if (e.key === "Enter") document.getElementById("loginPass").focus();
   });
-  document.getElementById("signupPass").addEventListener("keydown", e => {
+  document.getElementById("signupPassConfirm").addEventListener("keydown", e => {
     if (e.key === "Enter") doSignup();
   });
-  document.getElementById("signupUser").addEventListener("keydown", e => {
+  document.getElementById("signupPass").addEventListener("keydown", e => {
+    if (e.key === "Enter") document.getElementById("signupPassConfirm").focus();
+  });
+  document.getElementById("signupPhone").addEventListener("keydown", e => {
     if (e.key === "Enter") document.getElementById("signupPass").focus();
   });
+  document.getElementById("signupEmail").addEventListener("keydown", e => {
+    if (e.key === "Enter") document.getElementById("signupPhone").focus();
+  });
   document.getElementById("signupName").addEventListener("keydown", e => {
-    if (e.key === "Enter") document.getElementById("signupUser").focus();
+    if (e.key === "Enter") document.getElementById("signupEmail").focus();
   });
   checkSession();
 });
+
+// ════════════════════════════════════════════════════════
+//  SIDE PANEL
+// ════════════════════════════════════════════════════════
+let _currentSideTab = "profile";
+
+function openSidePanel(tab) {
+  _currentSideTab = tab || _currentSideTab;
+  document.getElementById("sideOverlay").classList.add("open");
+  document.getElementById("sidePanel").classList.add("open");
+  switchSideTab(_currentSideTab);
+}
+function closeSidePanel() {
+  document.getElementById("sideOverlay").classList.remove("open");
+  document.getElementById("sidePanel").classList.remove("open");
+}
+function switchSideTab(tab) {
+  _currentSideTab = tab;
+  document.getElementById("tabProfile").classList.toggle("active", tab === "profile");
+  document.getElementById("tabUnlocks").classList.toggle("active", tab === "unlocks");
+  document.getElementById("sidePanelTitle").textContent = tab === "profile" ? "My Profile" : "My Unlocked Projects";
+  if (tab === "profile") renderProfileTab();
+  if (tab === "unlocks") renderUnlocksTab();
+}
+
+function escHtml(s) {
+  return String(s || "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+
+async function renderProfileTab() {
+  const body = document.getElementById("sideBody");
+  body.innerHTML = '<div style="text-align:center;padding:30px;color:var(--muted)">Loading...</div>';
+  const res = await fetch("/api/profile");
+  if (!res.ok) { body.innerHTML = "<p>Could not load profile.</p>"; return; }
+  const prof = await res.json();
+  const initials = (prof.name || "?").split(" ").map(w => w[0]).join("").toUpperCase().slice(0,2);
+  body.innerHTML = `
+    <div class="profile-avatar">${initials}</div>
+    <div class="profile-email-row">
+      <span class="email-val">${escHtml(prof.email)}</span>
+      <span class="verified-badge">&#x2713; Verified</span>
+    </div>
+    <div class="profile-field">
+      <label>Full Name</label>
+      <input type="text" id="profName" value="${escHtml(prof.name)}" placeholder="Your full name" />
+    </div>
+    <div class="profile-field">
+      <label>Phone Number</label>
+      <input type="tel" id="profPhone" value="${escHtml(prof.phone)}" placeholder="10-digit number" maxlength="10"
+             oninput="this.value=this.value.replace(/[^0-9]/g,'')" />
+    </div>
+    <div class="profile-field">
+      <label>Email Address</label>
+      <input type="email" value="${escHtml(prof.email)}" disabled />
+      <p class="locked-note">&#128274; Email cannot be changed for security reasons.</p>
+    </div>
+    <div class="profile-field">
+      <label>Password</label>
+      <input type="password" value="&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;" disabled />
+      <p class="locked-note">&#128274; Password cannot be changed here for security reasons.</p>
+    </div>
+    <button class="profile-save-btn" id="profSaveBtn" onclick="saveProfile()">Save Changes</button>
+    <div class="profile-msg" id="profMsg"></div>
+  `;
+}
+
+async function saveProfile() {
+  const name  = (document.getElementById("profName").value || "").trim();
+  const phone = (document.getElementById("profPhone").value || "").trim();
+  const btn   = document.getElementById("profSaveBtn");
+  const msg   = document.getElementById("profMsg");
+  msg.className = "profile-msg";
+  if (!name)  { showProfMsg("Name cannot be empty.", false); return; }
+  if (!/^[6-9][0-9]{9}$/.test(phone)) { showProfMsg("Please enter a valid 10-digit Indian mobile number (starting with 6-9).", false); return; }
+  btn.disabled = true; btn.textContent = "Saving...";
+  const res = await fetch("/api/profile", {
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name, phone })
+  });
+  const d = await res.json();
+  btn.disabled = false; btn.textContent = "Save Changes";
+  if (d.ok) {
+    showProfMsg("Profile updated successfully!", true);
+    document.getElementById("topbarUser").textContent = "Hi, " + name;
+  } else {
+    showProfMsg(d.error || "Could not update profile.", false);
+  }
+}
+function showProfMsg(msg, ok) {
+  const el = document.getElementById("profMsg");
+  el.textContent = msg;
+  el.className = "profile-msg " + (ok ? "ok" : "err");
+}
+
+async function renderUnlocksTab() {
+  const body = document.getElementById("sideBody");
+  body.innerHTML = '<div style="text-align:center;padding:30px;color:var(--muted)">Loading...</div>';
+  const res = await fetch("/api/my_unlocks");
+  if (!res.ok) { body.innerHTML = "<p>Could not load unlocks.</p>"; return; }
+  const data = await res.json();
+  const list = data.unlocks;
+  if (!list.length) {
+    body.innerHTML = `
+      <div class="unlock-empty">
+        <div class="empty-icon">&#128275;</div>
+        <p>You haven't unlocked any projects yet.<br>Browse projects and unlock premium analytics.</p>
+      </div>`;
+    return;
+  }
+  body.innerHTML = list.map(u => {
+    const pct   = Math.round((u.days_left / 15) * 100);
+    const color = u.days_left <= 3 ? "#ef5350" : u.days_left <= 7 ? "#ffa726" : "#43a047";
+    const dot   = u.days_left <= 3 ? "&#128308;" : u.days_left <= 7 ? "&#128993;" : "&#128994;";
+    return `
+      <div class="unlock-card">
+        <div class="unlock-card-name">${escHtml(u.project_name)}</div>
+        <div class="unlock-days-bar-wrap">
+          <div class="unlock-days-bar-bg">
+            <div class="unlock-days-bar" style="width:${pct}%;background:${color}"></div>
+          </div>
+          <span class="unlock-days-label" style="color:${color}">${dot} ${u.days_left}d left</span>
+        </div>
+      </div>`;
+  }).join("");
+}
 
 // ════════════════════════════════════════════════════════
 //  APP INIT — fetch project list from server
@@ -861,7 +1186,7 @@ function renderProjectFree(project, index) {
     <div class="payment-wall" id="paymentWall">
       <span class="payment-wall-icon">🔒</span>
       <h3>Unlock Premium Analytics</h3>
-      <p>Pay once to permanently unlock full price analytics, floor-wise charts, flat inventory, and detailed pricing data for <strong>${v(project,"project_name") || "this project"}</strong>.</p>
+      <p>Pay to unlock full price analytics for 15 days, floor-wise charts, flat inventory, and detailed pricing data for <strong>${v(project,"project_name") || "this project"}</strong>.</p>
       <div class="payment-wall-features">
         <div class="payment-wall-feature">📊 Price Charts</div>
         <div class="payment-wall-feature">🏗️ Tower Distribution</div>
@@ -871,7 +1196,7 @@ function renderProjectFree(project, index) {
       <button class="pay-btn" id="payBtn" onclick="initiatePayment(${index})">
         🔓 Unlock for ${UNLOCK_PRICE_LABEL}
       </button>
-      <div class="payment-note">🔐 Secure payment via Razorpay · Unlocked permanently for your account</div>
+      <div class="payment-note">🔐 Secure payment via Razorpay · Access valid for 15 days</div>
     </div>
   `;
 
