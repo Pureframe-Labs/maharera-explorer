@@ -86,8 +86,10 @@ body{background:var(--bg);color:var(--text);font-family:'Karla',sans-serif;font-
 .topbar-label { font-size:12px; color:rgba(255,255,255,0.65); font-weight:500; letter-spacing:.04em; }
 .logout-btn { background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.25); border-radius:7px; padding:6px 14px; font-family:'Karla',sans-serif; font-size:12px; font-weight:600; color:rgba(255,255,255,0.85); cursor:pointer; transition:all .15s; }
 .logout-btn:hover { background:rgba(255,255,255,0.22); color:white; }
-.profile-btn { background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.3); border-radius:7px; padding:6px 14px; font-family:'Karla',sans-serif; font-size:12px; font-weight:600; color:white; cursor:pointer; transition:all .15s; display:flex; align-items:center; gap:6px; }
-.profile-btn:hover { background:rgba(255,255,255,0.25); }
+.topbar-greeting { font-size:13px; color:rgba(255,255,255,0.85); font-weight:500; }
+.hamburger-btn { background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.25); border-radius:8px; width:38px; height:38px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:5px; cursor:pointer; transition:background .15s; padding:0; }
+.hamburger-btn:hover { background:rgba(255,255,255,0.25); }
+.hamburger-btn span { display:block; width:18px; height:2px; background:white; border-radius:2px; transition:all .2s; }
 .side-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:500; opacity:0; pointer-events:none; transition:opacity .25s; }
 .side-overlay.open { opacity:1; pointer-events:all; }
 .side-panel { position:fixed; top:0; right:0; width:360px; max-width:95vw; height:100vh; background:var(--white); z-index:501; box-shadow:-8px 0 40px rgba(0,0,0,0.18); transform:translateX(100%); transition:transform .28s cubic-bezier(.4,0,.2,1); display:flex; flex-direction:column; }
@@ -96,6 +98,8 @@ body{background:var(--bg);color:var(--text);font-family:'Karla',sans-serif;font-
 .side-panel-header h2 { font-family:'Playfair Display',serif; font-size:18px; font-weight:900; color:white; }
 .side-close { background:none; border:none; color:rgba(255,255,255,0.8); font-size:22px; cursor:pointer; line-height:1; padding:4px; }
 .side-close:hover { color:white; }
+.side-signout-btn { background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.3); border-radius:6px; padding:5px 12px; font-family:'Karla',sans-serif; font-size:12px; font-weight:600; color:white; cursor:pointer; transition:background .15s; }
+.side-signout-btn:hover { background:rgba(255,255,255,0.28); }
 .side-tabs { display:flex; border-bottom:2px solid var(--border); flex-shrink:0; }
 .side-tab { flex:1; padding:13px 8px; font-size:13px; font-weight:600; color:var(--muted); cursor:pointer; border:none; background:none; border-bottom:3px solid transparent; margin-bottom:-2px; transition:all .15s; font-family:'Karla',sans-serif; }
 .side-tab.active { color:var(--accent); border-bottom-color:var(--accent); }
@@ -472,9 +476,10 @@ footer{text-align:center;font-size:11px;color:var(--muted2);letter-spacing:.05em
       <div class="logo-text">Property Index</div>
     </div>
     <div class="topbar-right">
-      <button class="profile-btn" onclick="openSidePanel('profile')">&#128100; <span id="topbarUser"></span></button>
-      <button class="profile-btn" onclick="openSidePanel('unlocks')">&#128275; My Unlocks</button>
-      <button class="logout-btn" onclick="doLogout()">Sign out</button>
+      <span class="topbar-greeting" id="topbarUser"></span>
+      <button class="hamburger-btn" onclick="openSidePanel('profile')" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
     </div>
   </div>
 
@@ -539,7 +544,10 @@ footer{text-align:center;font-size:11px;color:var(--muted2);letter-spacing:.05em
 <div class="side-panel" id="sidePanel">
   <div class="side-panel-header">
     <h2 id="sidePanelTitle">My Profile</h2>
-    <button class="side-close" onclick="closeSidePanel()">&#x2715;</button>
+    <div style="display:flex;gap:8px;align-items:center">
+      <button class="side-signout-btn" onclick="doLogout()">Sign out</button>
+      <button class="side-close" onclick="closeSidePanel()">&#x2715;</button>
+    </div>
   </div>
   <div class="side-tabs">
     <button class="side-tab active" id="tabProfile"  onclick="switchSideTab('profile')">&#128100; Profile</button>
@@ -585,21 +593,30 @@ function setMode(mode) {
 const SUPABASE_URL_CLIENT = "https://gbojjpasnzevczvyndlx.supabase.co";
 
 async function checkSession() {
-  // Handle Google OAuth redirect (token in URL hash)
+  // Handle Google OAuth redirect — Supabase puts tokens in the URL hash
   const hash = window.location.hash;
   if (hash && hash.includes("access_token")) {
-    const params = new URLSearchParams(hash.substring(1));
+    const params       = new URLSearchParams(hash.substring(1));
     const accessToken  = params.get("access_token");
     const refreshToken = params.get("refresh_token") || "";
     if (accessToken) {
+      // Clear the hash from the URL immediately so it doesn't re-trigger on refresh
       history.replaceState(null, "", window.location.pathname);
-      const res = await fetch("/api/google_callback", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ access_token: accessToken, refresh_token: refreshToken })
-      });
-      const d = await res.json();
-      if (d.ok) { showApp(d.name); return; }
+      try {
+        const res = await fetch("/api/google_callback", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ access_token: accessToken, refresh_token: refreshToken })
+        });
+        const d = await res.json();
+        if (d.ok) { showApp(d.name); return; }
+        // If callback failed, show an error on the login page
+        const errEl = document.getElementById("loginError");
+        if (errEl) { errEl.textContent = d.error || "Google sign-in failed."; errEl.classList.add("show"); }
+      } catch(e) {
+        console.error("Google callback error:", e);
+      }
+      return;
     }
   }
   const res = await fetch("/api/me");
@@ -608,7 +625,9 @@ async function checkSession() {
 }
 
 async function doGoogleLogin() {
-  const redirectTo = window.location.origin + window.location.pathname;
+  // Use the EXACT current origin so Supabase redirects back here (propindex.xyz)
+  // Make sure propindex.xyz is added to Supabase Auth > URL Configuration > Redirect URLs
+  const redirectTo = window.location.origin;
   window.location.href = SUPABASE_URL_CLIENT + "/auth/v1/authorize?provider=google&redirect_to=" + encodeURIComponent(redirectTo);
 }
 
@@ -855,8 +874,8 @@ async function renderProfileTab() {
       <input type="text" id="profName" value="${escHtml(prof.name)}" placeholder="Your full name" />
     </div>
     <div class="profile-field">
-      <label>Phone Number</label>
-      <input type="tel" id="profPhone" value="${escHtml(prof.phone)}" placeholder="10-digit number" maxlength="10"
+      <label>Phone Number ${prof.auth_provider === 'google' && !prof.phone ? '<span style="color:var(--warn);font-weight:700">(required — please add)</span>' : ''}</label>
+      <input type="tel" id="profPhone" value="${escHtml(prof.phone)}" placeholder="10-digit Indian mobile number" maxlength="10"
              oninput="this.value=this.value.replace(/[^0-9]/g,'')" />
     </div>
     <div class="profile-field">
@@ -864,11 +883,17 @@ async function renderProfileTab() {
       <input type="email" value="${escHtml(prof.email)}" disabled />
       <p class="locked-note">&#128274; Email cannot be changed for security reasons.</p>
     </div>
+    ${prof.auth_provider === 'google' ? `
+    <div class="profile-field">
+      <label>Sign-in Method</label>
+      <input type="text" value="Google Account" disabled />
+      <p class="locked-note">&#128274; You signed in with Google — no password needed.</p>
+    </div>` : `
     <div class="profile-field">
       <label>Password</label>
       <input type="password" value="&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;" disabled />
       <p class="locked-note">&#128274; Password cannot be changed here for security reasons.</p>
-    </div>
+    </div>`}
     <button class="profile-save-btn" id="profSaveBtn" onclick="saveProfile()">Save Changes</button>
     <div class="profile-msg" id="profMsg"></div>
   `;
@@ -941,7 +966,7 @@ async function showApp(userName) {
   document.getElementById("loginPage").style.display = "none";
   document.getElementById("appPage").style.display   = "block";
   if (userName) {
-    document.getElementById("topbarUser").textContent = "Hi, " + userName;
+    document.getElementById("topbarUser").textContent = "Hi, " + userName.split(" ")[0];
   }
   document.getElementById("placeholder").innerHTML = `
     <div class="loading-state"><div class="spinner"></div> Loading projects…</div>`;

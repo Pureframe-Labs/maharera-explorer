@@ -179,11 +179,12 @@ def login():
 
         meta = user.user_metadata or {}
         name = meta.get("full_name", email)
-        session["logged_in"] = True
-        session["user_id"]   = user.id
-        session["email"]     = user.email
-        session["name"]      = name
-        session["phone"]     = meta.get("phone", "")
+        session["logged_in"]     = True
+        session["user_id"]       = user.id
+        session["email"]         = user.email
+        session["name"]          = name
+        session["phone"]         = meta.get("phone", "")
+        session["auth_provider"] = "email"
         return jsonify({"ok": True, "name": name})
 
     except Exception as e:
@@ -201,34 +202,39 @@ def login():
 @app.route("/api/google_callback", methods=["POST"])
 def google_callback():
     """
-    Receives the Supabase access token from the frontend after Google OAuth redirect.
-    Validates it with Supabase and creates a server session.
+    Receives the Supabase tokens from the frontend after Google OAuth redirect.
+    Uses set_session to properly establish the Supabase session, then creates
+    a Flask server session for subsequent API calls.
     """
-    data         = request.get_json()
-    access_token = data.get("access_token", "")
+    data          = request.get_json()
+    access_token  = data.get("access_token", "")
     refresh_token = data.get("refresh_token", "")
 
-    if not access_token:
-        return jsonify({"ok": False, "error": "Missing token."}), 400
+    if not access_token or not refresh_token:
+        return jsonify({"ok": False, "error": "Missing tokens."}), 400
 
     try:
-        res  = supabase.auth.get_user(access_token)
+        # set_session validates both tokens and returns a full session with user
+        res  = supabase.auth.set_session(access_token, refresh_token)
         user = res.user
         if user is None:
-            return jsonify({"ok": False, "error": "Invalid session."}), 401
+            return jsonify({"ok": False, "error": "Invalid Google session."}), 401
 
-        meta  = user.user_metadata or {}
-        name  = meta.get("full_name") or meta.get("name") or user.email
-        phone = meta.get("phone", "")
+        meta     = user.user_metadata or {}
+        name     = meta.get("full_name") or meta.get("name") or user.email
+        phone    = meta.get("phone", "")
+        provider = (user.app_metadata or {}).get("provider", "google")
 
-        session["logged_in"] = True
-        session["user_id"]   = user.id
-        session["email"]     = user.email
-        session["name"]      = name
-        session["phone"]     = phone
+        session["logged_in"]     = True
+        session["user_id"]       = user.id
+        session["email"]         = user.email
+        session["name"]          = name
+        session["phone"]         = phone
+        session["auth_provider"] = provider
         return jsonify({"ok": True, "name": name})
     except Exception as e:
-        return jsonify({"ok": False, "error": "Google sign-in failed."}), 500
+        err = str(e)
+        return jsonify({"ok": False, "error": f"Google sign-in failed: {err}"}), 500
 
 
 @app.route("/api/logout", methods=["POST"])
@@ -240,10 +246,11 @@ def logout():
 @app.route("/api/me")
 def me():
     return jsonify({
-        "logged_in": session.get("logged_in", False),
-        "name":      session.get("name", ""),
-        "email":     session.get("email", ""),
-        "phone":     session.get("phone", ""),
+        "logged_in":     session.get("logged_in", False),
+        "name":          session.get("name", ""),
+        "email":         session.get("email", ""),
+        "phone":         session.get("phone", ""),
+        "auth_provider": session.get("auth_provider", "email"),
     })
 
 
@@ -251,9 +258,10 @@ def me():
 @login_required
 def get_profile():
     return jsonify({
-        "name":  session.get("name", ""),
-        "email": session.get("email", ""),
-        "phone": session.get("phone", ""),
+        "name":          session.get("name", ""),
+        "email":         session.get("email", ""),
+        "phone":         session.get("phone", ""),
+        "auth_provider": session.get("auth_provider", "email"),
     })
 
 
@@ -266,7 +274,7 @@ def update_profile():
 
     if not name:
         return jsonify({"ok": False, "error": "Name cannot be empty."}), 400
-    if not phone or not phone.isdigit() or len(phone) != 10:
+    if phone and (not phone.isdigit() or len(phone) != 10):
         return jsonify({"ok": False, "error": "Phone must be exactly 10 digits."}), 400
 
     try:
