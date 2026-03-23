@@ -2,6 +2,7 @@
 Property Index Project Explorer — Server
 =========================================
 Auth + storage powered by Supabase.
+Wallet system: tokens purchased via plans, deducted on project unlock.
 """
 
 from flask import Flask, jsonify, session, request, send_from_directory, abort
@@ -15,10 +16,31 @@ app = Flask(__name__, static_folder="static")
 app.secret_key = SECRET_KEY
 
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_ANON_KEY)
-# Admin client (service role) — used for profile updates
+# Admin client (service role) — used for profile updates & wallet writes
 supabase_admin: Client = create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY) if SUPABASE_SERVICE_KEY else supabase
 
-UNLOCK_DAYS = 15   # paid access expires after this many days
+# ─── Pricing / token config ──────────────────────────────
+PROJECT_TOKEN_COST = 100        # tokens to unlock one project
+
+PLANS = {
+    "starter": {
+        "name":       "Starter Plan",
+        "tokens":     500,
+        "price_inr":  500,
+        "unlock_days": 15,
+    },
+    "enterprise": {
+        "name":       "Enterprise Plan",
+        "tokens":     5000,
+        "price_inr":  5000,
+        "unlock_days": 30,
+    },
+}
+
+# unlock duration by source: direct (no plan) = 5 days
+DIRECT_UNLOCK_DAYS    = 5
+STARTER_UNLOCK_DAYS   = 15
+ENTERPRISE_UNLOCK_DAYS = 30
 
 # ─── Auth helpers ────────────────────────────────────────
 
@@ -37,51 +59,121 @@ def clean(val):
         return ""
     return str(val).strip()
 
-# ─── Unlocks (Supabase Postgres, with 15-day expiry) ─────
+# ─── Wallet helpers (Supabase `wallets` table) ────────────
+# Schema: wallets(user_id PK, tokens int, plan text, plan_activated_at timestamptz)
+
+def _wallet_row(user_id: str) -> dict:
+    """Return wallet row or default zero wallet."""
+    res = supabase.table("wallets").select("*").eq("user_id", user_id).execute()
+    if res.data:
+        return res.data[0]
+    return {"user_id": user_id, "tokens": 0, "plan": None, "plan_activated_at": None}
+
+def get_wallet(user_id: str) -> dict:
+    row = _wallet_row(user_id)
+    plan = row.get("plan")
+    plan_activated_at = row.get("plan_activated_at")
+    plan_info = None
+    if plan and plan_activated_at:
+        activated = datetime.fromisoformat(plan_activated_at.replace("Z", "+00:00"))
+        plan_cfg  = PLANS.get(plan, {})
+        plan_info = {
+            "plan":          plan,
+            "name":          plan_cfg.get("name", plan),
+            "activated_at":  plan_activated_at,
+            "unlock_days":   plan_cfg.get("unlock_days", DIRECT_UNLOCK_DAYS),
+        }
+    return {
+        "tokens":   row.get("tokens", 0),
+        "plan":     plan_info,
+    }
+
+def deduct_tokens(user_id: str, amount: int) -> bool:
+    """Deduct tokens; returns False if insufficient balance."""
+    row = _wallet_row(user_id)
+    current = row.get("tokens", 0)
+    if current < amount:
+        return False
+    new_balance = current - amount
+    supabase_admin.table("wallets").upsert({
+        "user_id": user_id,
+        "tokens":  new_balance,
+        "plan":    row.get("plan"),
+        "plan_activated_at": row.get("plan_activated_at"),
+    }).execute()
+    return True
+
+def add_tokens(user_id: str, amount: int, plan: str | None = None):
+    """Add tokens to wallet; optionally record the plan."""
+    row    = _wallet_row(user_id)
+    update = {
+        "user_id": user_id,
+        "tokens":  row.get("tokens", 0) + amount,
+        "plan":    plan if plan else row.get("plan"),
+        "plan_activated_at": datetime.now(timezone.utc).isoformat() if plan else row.get("plan_activated_at"),
+    }
+    supabase_admin.table("wallets").upsert(update).execute()
+
+# ─── Unlocks (Supabase Postgres, expiry depends on unlock source) ─────
+# Schema: unlocks(user_id, project_index, unlocked_at, unlock_source text)
+# unlock_source: "direct" | "starter" | "enterprise"
+
+def _unlock_days_for_source(source: str) -> int:
+    if source == "starter":
+        return STARTER_UNLOCK_DAYS
+    if source == "enterprise":
+        return ENTERPRISE_UNLOCK_DAYS
+    return DIRECT_UNLOCK_DAYS   # "direct" or legacy
 
 def _unlock_row(user_id: str, project_index: int):
-    """Return the unlock row dict if it exists and is not expired, else None."""
+    """Return unlock row if it exists and is not expired, else None."""
     res = supabase.table("unlocks") \
-        .select("project_index, unlocked_at") \
+        .select("project_index, unlocked_at, unlock_source") \
         .eq("user_id", user_id) \
         .eq("project_index", project_index) \
         .execute()
     if not res.data:
         return None
-    row = res.data[0]
+    row     = res.data[0]
+    source  = row.get("unlock_source", "direct")
+    days    = _unlock_days_for_source(source)
     unlocked_at = datetime.fromisoformat(row["unlocked_at"].replace("Z", "+00:00"))
-    if datetime.now(timezone.utc) - unlocked_at > timedelta(days=UNLOCK_DAYS):
+    if datetime.now(timezone.utc) - unlocked_at > timedelta(days=days):
         return None   # expired
     return row
 
 def is_unlocked(user_id: str, project_index: int) -> bool:
     return _unlock_row(user_id, project_index) is not None
 
-def unlock_project(user_id: str, project_index: int):
-    """Insert or refresh the unlock (resets the 15-day clock on re-payment)."""
+def unlock_project(user_id: str, project_index: int, source: str = "direct"):
+    """Insert or refresh the unlock with source (resets expiry clock)."""
     supabase.table("unlocks").upsert({
-        "user_id":       user_id,
-        "project_index": project_index,
-        "unlocked_at":   datetime.now(timezone.utc).isoformat()
+        "user_id":        user_id,
+        "project_index":  project_index,
+        "unlocked_at":    datetime.now(timezone.utc).isoformat(),
+        "unlock_source":  source,
     }).execute()
 
 def get_unlocked_list(user_id: str) -> list:
-    """Return list of {project_index, unlocked_at, days_left} for non-expired unlocks."""
+    """Return list of {project_index, unlocked_at, days_left, unlock_source} for non-expired unlocks."""
     res = supabase.table("unlocks") \
-        .select("project_index, unlocked_at") \
+        .select("project_index, unlocked_at, unlock_source") \
         .eq("user_id", user_id) \
         .execute()
-    now = datetime.now(timezone.utc)
+    now    = datetime.now(timezone.utc)
     result = []
     for row in res.data:
+        source      = row.get("unlock_source", "direct")
+        days        = _unlock_days_for_source(source)
         unlocked_at = datetime.fromisoformat(row["unlocked_at"].replace("Z", "+00:00"))
-        elapsed = now - unlocked_at
-        if elapsed <= timedelta(days=UNLOCK_DAYS):
-            days_left = UNLOCK_DAYS - int(elapsed.total_seconds() // 86400)
+        elapsed     = now - unlocked_at
+        if elapsed <= timedelta(days=days):
+            days_left = days - int(elapsed.total_seconds() // 86400)
             result.append({
                 "project_index": row["project_index"],
                 "unlocked_at":   row["unlocked_at"],
-                "days_left":     days_left
+                "days_left":     days_left,
+                "unlock_source": source,
             })
     return result
 
@@ -201,11 +293,6 @@ def login():
 
 @app.route("/api/google_callback", methods=["POST"])
 def google_callback():
-    """
-    Receives the Supabase tokens from the frontend after Google OAuth redirect.
-    Uses set_session to properly establish the Supabase session, then creates
-    a Flask server session for subsequent API calls.
-    """
     data          = request.get_json()
     access_token  = data.get("access_token", "")
     refresh_token = data.get("refresh_token", "")
@@ -214,7 +301,6 @@ def google_callback():
         return jsonify({"ok": False, "error": "Missing tokens."}), 400
 
     try:
-        # set_session validates both tokens and returns a full session with user
         res  = supabase.auth.set_session(access_token, refresh_token)
         user = res.user
         if user is None:
@@ -279,9 +365,6 @@ def update_profile():
 
     try:
         user_id = session["user_id"]
-        # Update metadata in Supabase auth using admin approach via user token stored in session
-        # We use the anon client's update_user which requires the user to be signed in
-        # Since we use server-side sessions, we update via admin API
         supabase_admin.auth.admin.update_user_by_id(user_id, {
             "user_metadata": {
                 "full_name": name,
@@ -294,6 +377,104 @@ def update_profile():
     except Exception as e:
         return jsonify({"ok": False, "error": "Could not update profile. Please try again."}), 500
 
+
+# ─── Wallet routes ─────────────────────────────────────────
+
+@app.route("/api/wallet")
+@login_required
+def wallet():
+    user_id = session.get("user_id", "")
+    return jsonify(get_wallet(user_id))
+
+
+@app.route("/api/plans")
+def plans():
+    """Return available plans."""
+    return jsonify({"plans": PLANS, "token_cost": PROJECT_TOKEN_COST})
+
+
+@app.route("/api/topup", methods=["POST"])
+@login_required
+def topup():
+    """
+    Called after a Razorpay payment is confirmed.
+    Body: { "plan": "starter" | "enterprise" | "direct", "project_index": <int|null> }
+    For "direct": deducts from wallet if enough tokens, else adds 100 tokens for ₹99.
+    For "starter" / "enterprise": credits the plan tokens.
+    """
+    user_id = session.get("user_id", "")
+    data    = request.get_json()
+    plan    = data.get("plan", "direct")
+
+    if plan not in ("starter", "enterprise", "direct"):
+        return jsonify({"ok": False, "error": "Invalid plan."}), 400
+
+    if plan == "direct":
+        # Direct top-up: add 100 tokens (for ₹99 one-time project unlock)
+        add_tokens(user_id, PROJECT_TOKEN_COST)
+        return jsonify({"ok": True, "tokens_added": PROJECT_TOKEN_COST, "wallet": get_wallet(user_id)})
+
+    cfg     = PLANS[plan]
+    tokens  = cfg["tokens"]
+    add_tokens(user_id, tokens, plan=plan)
+    return jsonify({"ok": True, "tokens_added": tokens, "plan": plan, "wallet": get_wallet(user_id)})
+
+
+@app.route("/api/unlock_with_tokens", methods=["POST"])
+@login_required
+def unlock_with_tokens():
+    """
+    Deduct PROJECT_TOKEN_COST tokens from wallet and unlock the project.
+    Body: { "project_index": <int> }
+    Returns: { ok, wallet } or { ok: false, insufficient_tokens: true }
+    """
+    user_id = session.get("user_id", "")
+    data    = request.get_json()
+    idx     = data.get("project_index")
+
+    if idx is None:
+        return jsonify({"ok": False, "error": "Missing project_index"}), 400
+
+    idx = int(idx)
+
+    # Already unlocked — no charge
+    if is_unlocked(user_id, idx):
+        return jsonify({"ok": True, "already_unlocked": True, "wallet": get_wallet(user_id)})
+
+    # Determine source from active plan
+    wallet  = get_wallet(user_id)
+    plan    = wallet.get("plan") or {}
+    plan_id = plan.get("plan") if plan else None
+    source  = plan_id if plan_id in ("starter", "enterprise") else "direct"
+
+    ok = deduct_tokens(user_id, PROJECT_TOKEN_COST)
+    if not ok:
+        return jsonify({
+            "ok":                False,
+            "insufficient_tokens": True,
+            "tokens_available":  wallet.get("tokens", 0),
+            "tokens_required":   PROJECT_TOKEN_COST,
+        }), 402
+
+    unlock_project(user_id, idx, source=source)
+    return jsonify({"ok": True, "wallet": get_wallet(user_id)})
+
+
+# ─── Legacy manual unlock (kept for admin use) ─────────────
+
+@app.route("/api/unlock_manual", methods=["POST"])
+@login_required
+def unlock_manual():
+    user_id = session.get("user_id", "")
+    data    = request.get_json()
+    idx     = data.get("project_index")
+    if idx is None:
+        return jsonify({"ok": False, "error": "Missing project_index"}), 400
+    unlock_project(user_id, int(idx), source="direct")
+    return jsonify({"ok": True})
+
+
+# ─── My unlocks ───────────────────────────────────────────
 
 @app.route("/api/my_unlocks")
 @login_required
@@ -309,7 +490,8 @@ def my_unlocks():
             "project_index": idx,
             "project_name":  name,
             "days_left":     u["days_left"],
-            "unlocked_at":   u["unlocked_at"]
+            "unlocked_at":   u["unlocked_at"],
+            "unlock_source": u.get("unlock_source", "direct"),
         })
     return jsonify({"unlocks": result})
 
@@ -363,18 +545,6 @@ def api_project(index):
         return jsonify({"project": projects[index], "graph": load_graph(index + 1)})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
-
-@app.route("/api/unlock_manual", methods=["POST"])
-@login_required
-def unlock_manual():
-    user_id = session.get("user_id", "")
-    data    = request.get_json()
-    idx     = data.get("project_index")
-    if idx is None:
-        return jsonify({"ok": False, "error": "Missing project_index"}), 400
-    unlock_project(user_id, int(idx))
-    return jsonify({"ok": True})
 
 
 @app.route("/")

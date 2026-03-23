@@ -90,6 +90,129 @@ body{background:var(--bg);color:var(--text);font-family:'Karla',sans-serif;font-
 .hamburger-btn { background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.25); border-radius:8px; width:38px; height:38px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:5px; cursor:pointer; transition:background .15s; padding:0; }
 .hamburger-btn:hover { background:rgba(255,255,255,0.25); }
 .hamburger-btn span { display:block; width:18px; height:2px; background:white; border-radius:2px; transition:all .2s; }
+
+/* ── Wallet badge in topbar ── */
+.wallet-badge {
+  display:flex; align-items:center; gap:7px;
+  background:rgba(255,255,255,0.13); border:1px solid rgba(255,255,255,0.28);
+  border-radius:20px; padding:5px 14px 5px 10px;
+  cursor:pointer; transition:background .15s;
+  font-size:13px; color:white; font-weight:600;
+}
+.wallet-badge:hover { background:rgba(255,255,255,0.22); }
+.wallet-badge .w-icon { font-size:15px; }
+.wallet-badge .w-tokens { font-family:'Playfair Display',serif; font-size:15px; font-weight:700; }
+.wallet-badge .w-label { font-size:11px; color:rgba(255,255,255,0.7); font-weight:500; letter-spacing:.04em; }
+
+/* ── Plans modal ── */
+.plans-overlay {
+  position:fixed; inset:0; background:rgba(0,0,0,0.55);
+  z-index:800; display:flex; align-items:center; justify-content:center;
+  padding:24px; opacity:0; pointer-events:none; transition:opacity .22s;
+}
+.plans-overlay.open { opacity:1; pointer-events:all; }
+.plans-modal {
+  background:var(--white); border-radius:20px;
+  max-width:780px; width:100%; box-shadow:0 24px 80px rgba(0,0,0,0.28);
+  overflow:hidden; transform:translateY(16px); transition:transform .22s;
+  max-height:90vh; overflow-y:auto;
+}
+.plans-overlay.open .plans-modal { transform:translateY(0); }
+.plans-modal-header {
+  background:var(--accent); padding:24px 30px;
+  display:flex; align-items:center; justify-content:space-between;
+}
+.plans-modal-header h2 {
+  font-family:'Playfair Display',serif; font-size:22px; font-weight:900; color:white;
+}
+.plans-modal-close {
+  background:none; border:none; color:rgba(255,255,255,0.8);
+  font-size:22px; cursor:pointer; line-height:1; padding:4px;
+}
+.plans-modal-close:hover { color:white; }
+.plans-modal-body { padding:30px; }
+.plans-grid { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+@media(max-width:600px) { .plans-grid { grid-template-columns:1fr; } }
+.plan-card {
+  border:2px solid var(--border); border-radius:16px; padding:28px 24px;
+  position:relative; transition:border-color .15s, box-shadow .15s;
+  display:flex; flex-direction:column;
+}
+.plan-card:hover { border-color:var(--accent); box-shadow:0 6px 24px rgba(42,92,170,.12); }
+.plan-card.featured {
+  border-color:var(--rent); background:linear-gradient(135deg,#faf8ff,#f3eeff);
+}
+.plan-card.featured:hover { box-shadow:0 6px 24px rgba(110,53,171,.18); }
+.plan-badge {
+  position:absolute; top:-12px; left:50%; transform:translateX(-50%);
+  background:var(--rent); color:white; font-size:11px; font-weight:700;
+  letter-spacing:.06em; padding:4px 14px; border-radius:20px; white-space:nowrap;
+  text-transform:uppercase;
+}
+.plan-name { font-size:12px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin-bottom:10px; }
+.plan-price { font-family:'Playfair Display',serif; font-size:38px; font-weight:900; color:var(--text); line-height:1; margin-bottom:4px; }
+.plan-price span { font-size:18px; font-weight:700; }
+.plan-tokens { font-size:13px; color:var(--accent); font-weight:700; margin-bottom:16px; }
+.plan-desc { font-size:13px; color:var(--muted); line-height:1.5; margin-bottom:20px; }
+.plan-features { list-style:none; margin-bottom:24px; flex:1; }
+.plan-features li { font-size:13px; color:var(--text2); padding:6px 0; border-bottom:1px solid var(--border); display:flex; align-items:flex-start; gap:8px; }
+.plan-features li:last-child { border-bottom:none; }
+.plan-features li .pf-icon { color:var(--accent2); font-size:14px; flex-shrink:0; margin-top:1px; }
+.plan-card.featured .plan-features li .pf-icon { color:var(--rent); }
+.plan-btn {
+  width:100%; border:none; border-radius:10px; padding:13px;
+  font-family:'Karla',sans-serif; font-size:14px; font-weight:700;
+  cursor:pointer; transition:all .15s; letter-spacing:.02em;
+}
+.plan-btn.starter-btn { background:var(--accent); color:white; }
+.plan-btn.starter-btn:hover { background:#1e4a90; transform:translateY(-1px); box-shadow:0 4px 18px rgba(42,92,170,.3); }
+.plan-btn.enterprise-btn { background:var(--rent); color:white; }
+.plan-btn.enterprise-btn:hover { background:#5c2a9a; transform:translateY(-1px); box-shadow:0 4px 18px rgba(110,53,171,.3); }
+.plan-btn:disabled { background:var(--muted2); cursor:not-allowed; transform:none !important; box-shadow:none !important; }
+.plans-note { text-align:center; font-size:12px; color:var(--muted); margin-top:18px; }
+
+/* ── Insufficient tokens wall ── */
+.wallet-wall {
+  background:var(--warn-light); border:1.5px solid #f0c4aa;
+  border-radius:14px; padding:28px 24px; text-align:center; margin-top:20px;
+}
+.wallet-wall-icon { font-size:36px; margin-bottom:10px; }
+.wallet-wall h3 { font-family:'Playfair Display',serif; font-size:18px; font-weight:900; color:var(--warn); margin-bottom:8px; }
+.wallet-wall p { font-size:13px; color:var(--muted); margin-bottom:20px; line-height:1.6; }
+.wallet-wall-actions { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
+.ww-btn { border:none; border-radius:9px; padding:11px 22px; font-family:'Karla',sans-serif; font-size:13px; font-weight:700; cursor:pointer; transition:all .15s; }
+.ww-btn.primary { background:var(--accent); color:white; }
+.ww-btn.primary:hover { background:#1e4a90; }
+.ww-btn.secondary { background:var(--rent); color:white; }
+.ww-btn.secondary:hover { background:#5c2a9a; }
+
+/* ── Wallet tab in side panel ── */
+.wallet-summary {
+  background:linear-gradient(135deg, var(--accent), #2a5caa);
+  border-radius:14px; padding:22px 20px; text-align:center; margin-bottom:20px; color:white;
+}
+.wallet-summary .ws-label { font-size:11px; font-weight:600; letter-spacing:.1em; text-transform:uppercase; opacity:.75; margin-bottom:8px; }
+.wallet-summary .ws-tokens { font-family:'Playfair Display',serif; font-size:42px; font-weight:900; line-height:1; }
+.wallet-summary .ws-sub { font-size:12px; opacity:.7; margin-top:6px; }
+.wallet-plan-tag {
+  display:inline-flex; align-items:center; gap:6px;
+  background:rgba(255,255,255,0.2); border-radius:20px;
+  padding:4px 14px; font-size:12px; font-weight:700; margin-top:10px;
+}
+.topup-section-title { font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin-bottom:12px; }
+.mini-plan-card {
+  border:1.5px solid var(--border); border-radius:10px; padding:14px 16px;
+  margin-bottom:10px; display:flex; align-items:center; justify-content:space-between;
+  gap:12px; transition:border-color .15s;
+}
+.mini-plan-card:hover { border-color:var(--accent); }
+.mini-plan-card.enterprise { border-color:rgba(110,53,171,.3); background:#faf8ff; }
+.mini-plan-card.enterprise:hover { border-color:var(--rent); }
+.mini-plan-info .mp-name { font-size:13px; font-weight:700; color:var(--text); }
+.mini-plan-info .mp-tokens { font-size:11px; color:var(--muted); margin-top:2px; }
+.mini-plan-btn { border:none; border-radius:7px; padding:7px 14px; font-family:'Karla',sans-serif; font-size:12px; font-weight:700; cursor:pointer; white-space:nowrap; }
+.mini-plan-btn.starter { background:var(--accent); color:white; }
+.mini-plan-btn.enterprise { background:var(--rent); color:white; }
 .side-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:500; opacity:0; pointer-events:none; transition:opacity .25s; }
 .side-overlay.open { opacity:1; pointer-events:all; }
 .side-panel { position:fixed; top:0; right:0; width:360px; max-width:95vw; height:100vh; background:var(--white); z-index:501; box-shadow:-8px 0 40px rgba(0,0,0,0.18); transform:translateX(100%); transition:transform .28s cubic-bezier(.4,0,.2,1); display:flex; flex-direction:column; }
@@ -477,6 +600,11 @@ footer{text-align:center;font-size:11px;color:var(--muted2);letter-spacing:.05em
     </div>
     <div class="topbar-right">
       <span class="topbar-greeting" id="topbarUser"></span>
+      <button class="wallet-badge" id="walletBadge" onclick="openSidePanel('wallet')" title="My Wallet">
+        <span class="w-icon">🪙</span>
+        <span class="w-tokens" id="walletTokenCount">—</span>
+        <span class="w-label">tokens</span>
+      </button>
       <button class="hamburger-btn" onclick="openSidePanel('profile')" aria-label="Menu">
         <span></span><span></span><span></span>
       </button>
@@ -551,7 +679,8 @@ footer{text-align:center;font-size:11px;color:var(--muted2);letter-spacing:.05em
   </div>
   <div class="side-tabs">
     <button class="side-tab active" id="tabProfile"  onclick="switchSideTab('profile')">&#128100; Profile</button>
-    <button class="side-tab"        id="tabUnlocks"  onclick="switchSideTab('unlocks')">&#128275; My Unlocks</button>
+    <button class="side-tab"        id="tabWallet"   onclick="switchSideTab('wallet')">🪙 Wallet</button>
+    <button class="side-tab"        id="tabUnlocks"  onclick="switchSideTab('unlocks')">&#128275; Unlocks</button>
   </div>
   <div class="side-body" id="sideBody"></div>
 </div>
@@ -570,8 +699,8 @@ let priceChart      = null;
 
 // ── Payment config ──
 // Set your Razorpay payment link here:
-const RAZORPAY_PAYMENT_LINK = "https://rzp.io/rzp/NEeyCNKr"; // <-- Replace with your link
-const UNLOCK_PRICE_LABEL    = "₹99";  // shown on the payment wall button
+// Wallet config
+const PROJECT_TOKEN_COST = 100; // tokens deducted per project unlock
 
 function setMode(mode) {
   currentMode = mode;
@@ -846,9 +975,12 @@ function closeSidePanel() {
 function switchSideTab(tab) {
   _currentSideTab = tab;
   document.getElementById("tabProfile").classList.toggle("active", tab === "profile");
+  document.getElementById("tabWallet").classList.toggle("active",  tab === "wallet");
   document.getElementById("tabUnlocks").classList.toggle("active", tab === "unlocks");
-  document.getElementById("sidePanelTitle").textContent = tab === "profile" ? "My Profile" : "My Unlocked Projects";
+  const titles = { profile: "My Profile", wallet: "My Wallet", unlocks: "My Unlocked Projects" };
+  document.getElementById("sidePanelTitle").textContent = titles[tab] || "My Profile";
   if (tab === "profile") renderProfileTab();
+  if (tab === "wallet")  renderWalletTab();
   if (tab === "unlocks") renderUnlocksTab();
 }
 
@@ -938,17 +1070,22 @@ async function renderUnlocksTab() {
     body.innerHTML = `
       <div class="unlock-empty">
         <div class="empty-icon">&#128275;</div>
-        <p>You haven't unlocked any projects yet.<br>Browse projects and unlock premium analytics.</p>
+        <p>You haven't unlocked any projects yet.<br>Browse projects and use tokens to unlock premium analytics.</p>
       </div>`;
     return;
   }
+  const maxDays = { direct: 5, starter: 15, enterprise: 30 };
   body.innerHTML = list.map(u => {
-    const pct   = Math.round((u.days_left / 15) * 100);
+    const src   = u.unlock_source || "direct";
+    const max   = maxDays[src] || 15;
+    const pct   = Math.round((u.days_left / max) * 100);
     const color = u.days_left <= 3 ? "#ef5350" : u.days_left <= 7 ? "#ffa726" : "#43a047";
     const dot   = u.days_left <= 3 ? "&#128308;" : u.days_left <= 7 ? "&#128993;" : "&#128994;";
+    const srcLabel = { direct: "Direct", starter: "Starter", enterprise: "Enterprise" }[src] || src;
     return `
       <div class="unlock-card">
         <div class="unlock-card-name">${escHtml(u.project_name)}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">via ${srcLabel} plan · ${max}-day access</div>
         <div class="unlock-days-bar-wrap">
           <div class="unlock-days-bar-bg">
             <div class="unlock-days-bar" style="width:${pct}%;background:${color}"></div>
@@ -957,6 +1094,215 @@ async function renderUnlocksTab() {
         </div>
       </div>`;
   }).join("");
+}
+
+// ════════════════════════════════════════════════════════
+//  WALLET
+// ════════════════════════════════════════════════════════
+let _walletData = null;
+
+async function fetchWallet() {
+  try {
+    const res = await fetch("/api/wallet");
+    if (!res.ok) return null;
+    _walletData = await res.json();
+    updateWalletBadge();
+    return _walletData;
+  } catch(e) { return null; }
+}
+
+function updateWalletBadge() {
+  const el = document.getElementById("walletTokenCount");
+  if (el && _walletData) el.textContent = (_walletData.tokens || 0).toLocaleString();
+}
+
+async function renderWalletTab() {
+  const body = document.getElementById("sideBody");
+  body.innerHTML = '<div style="text-align:center;padding:30px;color:var(--muted)">Loading...</div>';
+  const w = await fetchWallet();
+  if (!w) { body.innerHTML = "<p>Could not load wallet.</p>"; return; }
+  const tokens  = w.tokens || 0;
+  const plan    = w.plan;
+  const planTag = plan
+    ? `<div class="wallet-plan-tag">✨ ${escHtml(plan.name)} Active</div>`
+    : `<div style="font-size:12px;opacity:.65;margin-top:8px">No active plan</div>`;
+
+  body.innerHTML = `
+    <div class="wallet-summary">
+      <div class="ws-label">Token Balance</div>
+      <div class="ws-tokens">${tokens.toLocaleString()}</div>
+      <div class="ws-sub">1 token = ₹1 · Each project costs 100 tokens</div>
+      ${planTag}
+    </div>
+    <div class="topup-section-title">Top Up Your Wallet</div>
+    <div class="mini-plan-card">
+      <div class="mini-plan-info">
+        <div class="mp-name">🚀 Starter Plan</div>
+        <div class="mp-tokens">500 tokens · ₹500 · 15-day unlock access</div>
+      </div>
+      <button class="mini-plan-btn starter" onclick="initiatePlanPayment('starter')">Buy</button>
+    </div>
+    <div class="mini-plan-card enterprise">
+      <div class="mini-plan-info">
+        <div class="mp-name">🏢 Enterprise Plan</div>
+        <div class="mp-tokens">5,000 tokens · ₹5,000 · 30-day unlock access</div>
+      </div>
+      <button class="mini-plan-btn enterprise" onclick="initiatePlanPayment('enterprise')">Buy</button>
+    </div>
+    <div style="font-size:12px;color:var(--muted);text-align:center;margin-top:14px;line-height:1.6">
+      🔐 Secure payment via Razorpay<br>
+      Tokens never expire · Each project unlock costs 100 tokens
+    </div>
+  `;
+}
+
+// ── Plans modal ──────────────────────────────────────────
+function openPlansModal() {
+  let overlay = document.getElementById("plansOverlay");
+  if (!overlay) {
+    overlay = document.createElement("div");
+    overlay.id = "plansOverlay";
+    overlay.className = "plans-overlay";
+    overlay.innerHTML = `
+      <div class="plans-modal">
+        <div class="plans-modal-header">
+          <h2>Choose a Plan</h2>
+          <button class="plans-modal-close" onclick="closePlansModal()">&#x2715;</button>
+        </div>
+        <div class="plans-modal-body">
+          <div class="plans-grid">
+            <!-- Starter -->
+            <div class="plan-card">
+              <div class="plan-name">Starter Plan</div>
+              <div class="plan-price"><span>₹</span>500</div>
+              <div class="plan-tokens">🪙 500 Tokens</div>
+              <div class="plan-desc">Perfect for individuals exploring a handful of projects with full analytics.</div>
+              <ul class="plan-features">
+                <li><span class="pf-icon">✓</span>500 tokens (unlock 5 projects)</li>
+                <li><span class="pf-icon">✓</span>15-day access per unlock</li>
+                <li><span class="pf-icon">✓</span>Full price analytics & charts</li>
+                <li><span class="pf-icon">✓</span>Floor-wise pricing data</li>
+                <li><span class="pf-icon">✓</span>Flat inventory details</li>
+                <li><span class="pf-icon">✓</span>24×7 support</li>
+              </ul>
+              <button class="plan-btn starter-btn" id="starterPlanBtn" onclick="initiatePlanPayment('starter')">
+                🚀 Get Starter — ₹500
+              </button>
+            </div>
+            <!-- Enterprise -->
+            <div class="plan-card featured">
+              <div class="plan-badge">Most Popular</div>
+              <div class="plan-name">Enterprise Plan</div>
+              <div class="plan-price"><span>₹</span>5,000</div>
+              <div class="plan-tokens">🪙 5,000 Tokens</div>
+              <div class="plan-desc">For teams and power users who need deep access across many projects.</div>
+              <ul class="plan-features">
+                <li><span class="pf-icon">✓</span>5,000 tokens (unlock 50 projects)</li>
+                <li><span class="pf-icon">✓</span>30-day access per unlock</li>
+                <li><span class="pf-icon">✓</span>Full price analytics & charts</li>
+                <li><span class="pf-icon">✓</span>Floor-wise pricing data</li>
+                <li><span class="pf-icon">✓</span>Flat inventory details</li>
+                <li><span class="pf-icon">✓</span>Priority 24×7 support</li>
+              </ul>
+              <button class="plan-btn enterprise-btn" id="enterprisePlanBtn" onclick="initiatePlanPayment('enterprise')">
+                🏢 Get Enterprise — ₹5,000
+              </button>
+            </div>
+          </div>
+          <div class="plans-note">🔐 Secure payment via Razorpay · Tokens never expire · Cancel anytime</div>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+    overlay.addEventListener("click", e => { if (e.target === overlay) closePlansModal(); });
+  }
+  requestAnimationFrame(() => overlay.classList.add("open"));
+}
+
+function closePlansModal() {
+  const overlay = document.getElementById("plansOverlay");
+  if (overlay) overlay.classList.remove("open");
+}
+
+// ── Payment flow ─────────────────────────────────────────
+const RAZORPAY_PAYMENT_LINK = "https://rzp.io/rzp/NEeyCNKr"; // Replace with your link
+
+function initiatePlanPayment(plan) {
+  // Open Razorpay in new tab, then show confirm modal
+  window.open(RAZORPAY_PAYMENT_LINK, "_blank");
+  showPlanConfirmModal(plan);
+}
+
+function showPlanConfirmModal(plan) {
+  const planNames = { starter: "Starter (₹500 · 500 tokens)", enterprise: "Enterprise (₹5,000 · 5,000 tokens)" };
+  const existing = document.getElementById("planConfirmModal");
+  if (existing) existing.remove();
+
+  const modal = document.createElement("div");
+  modal.id = "planConfirmModal";
+  modal.className = "modal-overlay";
+  modal.innerHTML = `
+    <div class="modal-box">
+      <h3>🎉 Complete Your Payment</h3>
+      <p>A Razorpay payment page has been opened in a new tab.<br><br>
+      You're purchasing the <strong>${planNames[plan] || plan}</strong> plan.<br><br>
+      Once payment is done, click <strong>"I've Paid"</strong> to credit your wallet.</p>
+      <div class="modal-actions">
+        <button class="modal-btn-cancel" onclick="document.getElementById('planConfirmModal').remove()">Cancel</button>
+        <button class="modal-btn-confirm" onclick="confirmPlanTopup('${plan}')">
+          ✅ I've Paid — Credit Tokens
+        </button>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+}
+
+async function confirmPlanTopup(plan) {
+  const modal = document.getElementById("planConfirmModal");
+  if (modal) {
+    modal.querySelector(".modal-btn-confirm").disabled = true;
+    modal.querySelector(".modal-btn-confirm").textContent = "Crediting…";
+  }
+  try {
+    const res = await fetch("/api/topup", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ plan })
+    });
+    const d = await res.json();
+    if (d.ok) {
+      _walletData = d.wallet;
+      updateWalletBadge();
+      if (modal) modal.remove();
+      closePlansModal();
+      // Refresh wallet tab if open
+      if (_currentSideTab === "wallet") renderWalletTab();
+      showToast(`✅ ${d.tokens_added.toLocaleString()} tokens added to your wallet!`);
+    } else {
+      if (modal) modal.remove();
+      alert(d.error || "Could not credit tokens. Please contact support.");
+    }
+  } catch(e) {
+    if (modal) modal.remove();
+    alert("Network error. Please try again.");
+  }
+}
+
+// ── Toast helper ─────────────────────────────────────────
+function showToast(msg) {
+  let t = document.getElementById("walletToast");
+  if (!t) {
+    t = document.createElement("div");
+    t.id = "walletToast";
+    t.style.cssText = "position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(20px);background:#1a4f9c;color:white;padding:12px 22px;border-radius:10px;font-size:14px;font-weight:600;box-shadow:0 6px 24px rgba(0,0,0,.2);z-index:2000;opacity:0;transition:all .3s;pointer-events:none;";
+    document.body.appendChild(t);
+  }
+  t.textContent = msg;
+  requestAnimationFrame(() => {
+    t.style.opacity = "1"; t.style.transform = "translateX(-50%) translateY(0)";
+  });
+  setTimeout(() => {
+    t.style.opacity = "0"; t.style.transform = "translateX(-50%) translateY(20px)";
+  }, 3500);
 }
 
 // ════════════════════════════════════════════════════════
@@ -970,6 +1316,9 @@ async function showApp(userName) {
   }
   document.getElementById("placeholder").innerHTML = `
     <div class="loading-state"><div class="spinner"></div> Loading projects…</div>`;
+
+  // Load wallet balance in parallel
+  fetchWallet();
 
   try {
     const res  = await fetch("/api/projects");
@@ -1211,17 +1560,17 @@ function renderProjectFree(project, index) {
     <div class="payment-wall" id="paymentWall">
       <span class="payment-wall-icon">🔒</span>
       <h3>Unlock Premium Analytics</h3>
-      <p>Pay to unlock full price analytics for 15 days, floor-wise charts, flat inventory, and detailed pricing data for <strong>${v(project,"project_name") || "this project"}</strong>.</p>
+      <p>Use <strong>100 tokens</strong> to unlock full price analytics, floor-wise charts, flat inventory, and detailed pricing data for <strong>${v(project,"project_name") || "this project"}</strong>.</p>
       <div class="payment-wall-features">
         <div class="payment-wall-feature">📊 Price Charts</div>
         <div class="payment-wall-feature">🏗️ Tower Distribution</div>
         <div class="payment-wall-feature">📋 Flat Inventory</div>
         <div class="payment-wall-feature">💰 Floor-wise Pricing</div>
       </div>
-      <button class="pay-btn" id="payBtn" onclick="initiatePayment(${index})">
-        🔓 Unlock for ${UNLOCK_PRICE_LABEL}
+      <button class="pay-btn" id="unlockTokenBtn" onclick="unlockWithTokens(${index})">
+        🪙 Unlock with 100 Tokens
       </button>
-      <div class="payment-note">🔐 Secure payment via Razorpay · Access valid for 15 days</div>
+      <div class="payment-note">🔐 Access duration depends on your plan · Starter: 15 days · Enterprise: 30 days · Direct: 5 days</div>
     </div>
   `;
 
@@ -1233,83 +1582,72 @@ function renderProjectFree(project, index) {
   }, 80);
 }
 
-// ── Payment initiation ──
-function initiatePayment(projectIndex) {
-  const btn = document.getElementById("payBtn");
-  if (btn) btn.disabled = true;
+// ── Token-based unlock ────────────────────────────────────
+async function unlockWithTokens(projectIndex) {
+  const btn = document.getElementById("unlockTokenBtn");
+  if (btn) { btn.disabled = true; btn.textContent = "Checking balance…"; }
 
-  // Open payment link in new tab
-  window.open(RAZORPAY_PAYMENT_LINK, "_blank");
+  // Ensure we have latest wallet data
+  const w = _walletData || await fetchWallet();
+  const tokens = w ? (w.tokens || 0) : 0;
 
-  // Show confirmation modal
-  showPaymentConfirmModal(projectIndex);
-}
-
-function showPaymentConfirmModal(projectIndex) {
-  const existing = document.getElementById("paymentModal");
-  if (existing) existing.remove();
-
-  const modal = document.createElement("div");
-  modal.id = "paymentModal";
-  modal.className = "modal-overlay";
-  modal.innerHTML = `
-    <div class="modal-box">
-      <h3>🎉 Complete Your Payment</h3>
-      <p>A payment page has been opened in a new tab.<br><br>
-      Once you've completed the payment, click <strong>"I've Paid — Unlock Now"</strong> below to unlock this project for your account.</p>
-      <div class="modal-actions">
-        <button class="modal-btn-cancel" onclick="cancelPaymentModal(${projectIndex})">Cancel</button>
-        <button class="modal-btn-confirm" onclick="confirmPaymentAndUnlock(${projectIndex})">
-          ✅ I've Paid — Unlock Now
-        </button>
-      </div>
-    </div>`;
-  document.body.appendChild(modal);
-}
-
-function cancelPaymentModal(projectIndex) {
-  const modal = document.getElementById("paymentModal");
-  if (modal) modal.remove();
-  // Re-enable the pay button
-  const btn = document.getElementById("payBtn");
-  if (btn) btn.disabled = false;
-}
-
-async function confirmPaymentAndUnlock(projectIndex) {
-  const modal = document.getElementById("paymentModal");
-  if (modal) {
-    modal.querySelector(".modal-btn-confirm").disabled = true;
-    modal.querySelector(".modal-btn-confirm").textContent = "Unlocking…";
+  if (tokens < PROJECT_TOKEN_COST) {
+    // Not enough tokens — show insufficient wallet wall
+    showInsufficientTokensWall(projectIndex, tokens);
+    if (btn) { btn.disabled = false; btn.textContent = "🪙 Unlock with 100 Tokens"; }
+    return;
   }
 
+  if (btn) btn.textContent = "Unlocking…";
+
   try {
-    const res = await fetch("/api/unlock_manual", {
+    const res = await fetch("/api/unlock_with_tokens", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ project_index: projectIndex })
     });
+    const d = await res.json();
 
-    if (res.ok) {
-      if (modal) modal.remove();
-      // Update the local project list to mark as unlocked
-      if (ALL_PROJECTS[projectIndex]) {
-        ALL_PROJECTS[projectIndex].is_locked = false;
-      }
+    if (d.ok) {
+      // Update wallet state
+      _walletData = d.wallet;
+      updateWalletBadge();
+      // Mark project as unlocked in local list
+      if (ALL_PROJECTS[projectIndex]) ALL_PROJECTS[projectIndex].is_locked = false;
       renderDropList();
-      // Now load the full project
+      // Load full project
       const fullRes = await fetch(`/api/project/${projectIndex}`);
       if (fullRes.status === 401) { location.reload(); return; }
       const data = await fullRes.json();
       currentProject = { project: data.project, graph: data.graph, index: projectIndex, locked: false };
       renderProject(data.project, data.graph, projectIndex);
+      showToast("✅ Project unlocked! 100 tokens deducted.");
+    } else if (d.insufficient_tokens) {
+      showInsufficientTokensWall(projectIndex, d.tokens_available || 0);
+      if (btn) { btn.disabled = false; btn.textContent = "🪙 Unlock with 100 Tokens"; }
     } else {
-      alert("Could not unlock project. Please contact support.");
-      if (modal) modal.remove();
+      alert(d.error || "Could not unlock project. Please try again.");
+      if (btn) { btn.disabled = false; btn.textContent = "🪙 Unlock with 100 Tokens"; }
     }
-  } catch (e) {
+  } catch(e) {
     alert("Network error. Please try again.");
-    if (modal) modal.remove();
+    if (btn) { btn.disabled = false; btn.textContent = "🪙 Unlock with 100 Tokens"; }
   }
+}
+
+function showInsufficientTokensWall(projectIndex, currentTokens) {
+  // Replace payment wall content with the insufficient-tokens wall
+  const wall = document.getElementById("paymentWall");
+  if (!wall) return;
+  wall.innerHTML = `
+    <div class="wallet-wall-icon">🪙</div>
+    <h3>Not Enough Tokens</h3>
+    <p>You need <strong>100 tokens</strong> to unlock this project,<br>but your wallet only has <strong>${currentTokens} tokens</strong>.<br><br>Top up your wallet or view a plan to continue.</p>
+    <div class="wallet-wall-actions">
+      <button class="ww-btn primary" onclick="openSidePanel('wallet')">🪙 Top Up Wallet</button>
+      <button class="ww-btn secondary" onclick="openPlansModal()">📋 View Plans</button>
+    </div>
+  `;
 }
 
 let dropBound = false;
