@@ -398,9 +398,10 @@ def plans():
 def topup():
     """
     Called after a Razorpay payment is confirmed.
-    Body: { "plan": "starter" | "enterprise" | "direct", "project_index": <int|null> }
-    For "direct": deducts from wallet if enough tokens, else adds 100 tokens for ₹99.
-    For "starter" / "enterprise": credits the plan tokens.
+    Body: { "plan": "starter" | "enterprise" | "direct" }
+    For "starter" / "enterprise": credits plan tokens to wallet.
+    For "direct": adds 100 tokens directly to wallet (legacy path).
+    NOTE: Single-project direct payment (₹100, no wallet) uses /api/direct_project_unlock instead.
     """
     user_id = session.get("user_id", "")
     data    = request.get_json()
@@ -457,6 +458,28 @@ def unlock_with_tokens():
         }), 402
 
     unlock_project(user_id, idx, source=source)
+    return jsonify({"ok": True, "wallet": get_wallet(user_id)})
+
+
+@app.route("/api/direct_project_unlock", methods=["POST"])
+@login_required
+def direct_project_unlock():
+    """
+    Called after a ₹100 Razorpay payment for a single project.
+    Does NOT touch the token wallet — unlocks the project as a "direct" unlock (5 days).
+    Body: { "project_index": <int> }
+    """
+    user_id = session.get("user_id", "")
+    data    = request.get_json()
+    idx     = data.get("project_index")
+
+    if idx is None:
+        return jsonify({"ok": False, "error": "Missing project_index"}), 400
+
+    idx = int(idx)
+
+    # Unlock project with "direct" source → 5-day access
+    unlock_project(user_id, idx, source="direct")
     return jsonify({"ok": True, "wallet": get_wallet(user_id)})
 
 

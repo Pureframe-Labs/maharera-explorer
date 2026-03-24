@@ -1,0 +1,430 @@
+{
+  "tower_distribution": {
+    "Tower 1": 23,
+    "Tower 2": 17
+  },
+  "floor_prices": [
+    {
+      "floor": 11,
+      "tower1": 9700000,
+      "tower2": 10300000
+    },
+    {
+      "floor": 21,
+      "tower1": 11400000,
+      "tower2": 18000000
+    },
+    {
+      "floor": 26,
+      "tower1": 14200000,
+      "tower2": 9100000
+    },
+    {
+      "floor": 14,
+      "tower1": 14300000,
+      "tower2": 15100000
+    },
+    {
+      "floor": 22,
+      "tower1": 10900000,
+      "tower2": 16400000
+    },
+    {
+      "floor": 27,
+      "tower1": 16800000,
+      "tower2": 14200000
+    },
+    {
+      "floor": 28,
+      "tower1": 16400000,
+      "tower2": 10800000
+    },
+    {
+      "floor": 17,
+      "tower1": 10900000,
+      "tower2": 13500000
+    },
+    {
+      "floor": 13,
+      "tower1": 12700000,
+      "tower2": 14400000
+    },
+    {
+      "floor": 23,
+      "tower1": 13500000,
+      "tower2": 13000000
+    },
+    {
+      "floor": 9,
+      "tower1": 17500000,
+      "tower2": 9100000
+    },
+    {
+      "floor": 2,
+      "tower1": 12100000,
+      "tower2": 11500000
+    }
+  ],
+  "flats": [
+    {
+      "tower": "Tower 2",
+      "floor": 26,
+      "flat": 1204,
+      "area": 80,
+      "buying_price": 17700000,
+      "market_value": 15547571,
+      "renting_price": 63863
+    },
+    {
+      "tower": "Tower 1",
+      "floor": 15,
+      "flat": 2893,
+      "area": 115,
+      "buying_price": 11900000,
+      "market_value": 8781341,
+      "renting_price": 37904
+    },
+    {
+      "tower": "Tower 2",
+      "floor": 27,
+      "flat": 1660,
+      "area": 70,
+      "buying_price": 15000000,
+      "market_value": 12381290,
+      "renting_price": 84195
+    },
+    {
+      "tower": "Tower 2",
+      "floor": 20,
+      "flat": 1703,
+      "area": 75,
+      "buying_price": 9400000,
+      "market_value": 8140273,
+      "renting_price": 45095
+    },
+    {
+      "tower": "Tower 1",
+      "floor": 5,
+      "flat": 2812,
+      "area": 80,
+      "buying_price": 15000000,
+      "market_value": 11169469,
+      "renting_price": 66588
+    },
+    {
+      "tower": "Tower 1",
+      "floor": 26,
+      "flat": 1315,
+      "area": 80,
+      "buying_price": 10700000,
+      "market_value": 9575901,
+      "renting_price": 57821
+    },
+    {
+      "tower": "Tower 1",
+      "floor": 0,
+      "flat": 2230,
+      "area": 75,
+      "buying_price": 11000000,
+      "market_value": 9079928,
+      "renting_price": 45475
+    },
+    {
+      "tower": "Tower 1",
+      "floor": 10,
+      "flat": 1614,
+      "area": 115,
+      "buying_price": 17600000,
+      "market_value": 13752769,
+      "renting_price": 66853
+    },
+    {
+      "tower": "Tower 2",
+      "floor": 13,
+      "flat": 2514,
+      "area": 115,
+      "buying_price": 17600000,
+      "market_value": 15776875,
+      "renting_price": 64865
+    },
+    {
+      "tower": "Tower 1",
+      "floor": 11,
+      "flat": 1246,
+      "area": 110,
+      "buying_price": 15300000,
+      "market_value": 12739591,
+      "renting_price": 67014
+    },
+    {
+      "tower": "Tower 2",
+      "floor": 4,
+      "flat": 1992,
+      "area": 115,
+      "buying_price": 14000000,
+      "market_value": 10025757,
+      "renting_price": 50911
+    },
+    {
+      "tower": "Tower 1",
+      "floor": 0,
+      "flat": 2238,
+      "area": 80,
+      "buying_price": 14200000,
+      "market_value": 11679513,
+      "renting_price": 84108
+    },
+    {
+      "tower": "Tower 2",
+      "floor": 27,
+      "flat": 2261,
+      "area": 80,
+      "buying_price": 17600000,
+      "market_value": 14559120,
+      "renting_price": 53883
+    },
+    {
+      "tower": "Tower 1",
+      "floor": 23,
+      "flat": 1609,
+      "area": 75,
+      "buying_price": 17200000,
+      "market_value": 15250849,
+      "renting_price": 82068
+    },
+    {
+      "tower": "Tower 1",
+      "floor": 25,
+      "flat": 2955,
+      "area": 80,
+      "buying_price": 14300000,
+      "market_value": 11864775,
+      "renting_price": 44356
+    },
+    {
+      "tower": "Tower 1",
+      "floor": 3,
+      "flat": 2125,
+      "area": 115,
+      "buying_price": 15300000,
+      "market_value": 11377710,
+      "renting_price": 48182
+    },
+    {
+      "tower": "Tower 1",
+      "floor": 1,
+      "flat": 1581,
+      "area": 70,
+      "buying_price": 16800000,
+      "market_value": 14776003,
+      "renting_price": 59931
+    },
+    {
+      "tower": "Tower 1",
+      "floor": 23,
+      "flat": 2276,
+      "area": 115,
+      "buying_price": 13200000,
+      "market_value": 10586793,
+      "renting_price": 61070
+    },
+    {
+      "tower": "Tower 2",
+      "floor": 17,
+      "flat": 2921,
+      "area": 110,
+      "buying_price": 14900000,
+      "market_value": 10598551,
+      "renting_price": 61356
+    },
+    {
+      "tower": "Tower 2",
+      "floor": 26,
+      "flat": 1595,
+      "area": 75,
+      "buying_price": 9400000,
+      "market_value": 8458663,
+      "renting_price": 33127
+    },
+    {
+      "tower": "Tower 2",
+      "floor": 31,
+      "flat": 1791,
+      "area": 110,
+      "buying_price": 17600000,
+      "market_value": 12955161,
+      "renting_price": 92628
+    },
+    {
+      "tower": "Tower 2",
+      "floor": 20,
+      "flat": 1236,
+      "area": 115,
+      "buying_price": 10100000,
+      "market_value": 7466602,
+      "renting_price": 58092
+    },
+    {
+      "tower": "Tower 2",
+      "floor": 22,
+      "flat": 2433,
+      "area": 70,
+      "buying_price": 9800000,
+      "market_value": 7785736,
+      "renting_price": 42755
+    },
+    {
+      "tower": "Tower 2",
+      "floor": 29,
+      "flat": 2934,
+      "area": 110,
+      "buying_price": 10600000,
+      "market_value": 8796561,
+      "renting_price": 44646
+    },
+    {
+      "tower": "Tower 1",
+      "floor": 1,
+      "flat": 2152,
+      "area": 70,
+      "buying_price": 17800000,
+      "market_value": 15835496,
+      "renting_price": 83426
+    },
+    {
+      "tower": "Tower 1",
+      "floor": 20,
+      "flat": 1330,
+      "area": 110,
+      "buying_price": 15300000,
+      "market_value": 12295154,
+      "renting_price": 52115
+    },
+    {
+      "tower": "Tower 1",
+      "floor": 7,
+      "flat": 1543,
+      "area": 115,
+      "buying_price": 17500000,
+      "market_value": 13022417,
+      "renting_price": 78661
+    },
+    {
+      "tower": "Tower 2",
+      "floor": 10,
+      "flat": 2549,
+      "area": 70,
+      "buying_price": 15700000,
+      "market_value": 12318051,
+      "renting_price": 59512
+    },
+    {
+      "tower": "Tower 1",
+      "floor": 20,
+      "flat": 1515,
+      "area": 70,
+      "buying_price": 13400000,
+      "market_value": 10248210,
+      "renting_price": 54250
+    },
+    {
+      "tower": "Tower 1",
+      "floor": 1,
+      "flat": 1839,
+      "area": 75,
+      "buying_price": 14100000,
+      "market_value": 11121798,
+      "renting_price": 71281
+    },
+    {
+      "tower": "Tower 2",
+      "floor": 10,
+      "flat": 1905,
+      "area": 75,
+      "buying_price": 13800000,
+      "market_value": 10488912,
+      "renting_price": 48122
+    },
+    {
+      "tower": "Tower 2",
+      "floor": 7,
+      "flat": 1210,
+      "area": 115,
+      "buying_price": 9300000,
+      "market_value": 6914890,
+      "renting_price": 42091
+    },
+    {
+      "tower": "Tower 1",
+      "floor": 11,
+      "flat": 2854,
+      "area": 115,
+      "buying_price": 11800000,
+      "market_value": 8790571,
+      "renting_price": 45513
+    },
+    {
+      "tower": "Tower 1",
+      "floor": 31,
+      "flat": 2888,
+      "area": 75,
+      "buying_price": 16100000,
+      "market_value": 11974380,
+      "renting_price": 55290
+    },
+    {
+      "tower": "Tower 2",
+      "floor": 18,
+      "flat": 2017,
+      "area": 110,
+      "buying_price": 15800000,
+      "market_value": 11501465,
+      "renting_price": 94588
+    },
+    {
+      "tower": "Tower 2",
+      "floor": 18,
+      "flat": 1573,
+      "area": 75,
+      "buying_price": 15800000,
+      "market_value": 11922023,
+      "renting_price": 85750
+    },
+    {
+      "tower": "Tower 1",
+      "floor": 21,
+      "flat": 1974,
+      "area": 110,
+      "buying_price": 17400000,
+      "market_value": 13607955,
+      "renting_price": 78202
+    },
+    {
+      "tower": "Tower 1",
+      "floor": 13,
+      "flat": 1611,
+      "area": 70,
+      "buying_price": 11400000,
+      "market_value": 8971837,
+      "renting_price": 62542
+    },
+    {
+      "tower": "Tower 1",
+      "floor": 17,
+      "flat": 2389,
+      "area": 80,
+      "buying_price": 10000000,
+      "market_value": 8162669,
+      "renting_price": 44373
+    },
+    {
+      "tower": "Tower 1",
+      "floor": 3,
+      "flat": 2330,
+      "area": 110,
+      "buying_price": 14100000,
+      "market_value": 10493687,
+      "renting_price": 75410
+    }
+  ]
+}

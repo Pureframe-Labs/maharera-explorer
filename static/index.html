@@ -1642,12 +1642,83 @@ function showInsufficientTokensWall(projectIndex, currentTokens) {
   wall.innerHTML = `
     <div class="wallet-wall-icon">🪙</div>
     <h3>Not Enough Tokens</h3>
-    <p>You need <strong>100 tokens</strong> to unlock this project,<br>but your wallet only has <strong>${currentTokens} tokens</strong>.<br><br>Top up your wallet or view a plan to continue.</p>
+    <p>You need <strong>100 tokens</strong> to unlock this project,<br>but your wallet only has <strong>${currentTokens} tokens</strong>.<br><br>Pay ₹100 to open just this project for 5 days, or view a plan for better value.</p>
     <div class="wallet-wall-actions">
-      <button class="ww-btn primary" onclick="openSidePanel('wallet')">🪙 Top Up Wallet</button>
+      <button class="ww-btn primary" onclick="initiateDirectProjectPayment(${projectIndex})">🔓 Open This Project — ₹100</button>
       <button class="ww-btn secondary" onclick="openPlansModal()">📋 View Plans</button>
     </div>
   `;
+}
+
+// ── Direct ₹100 payment to open a single project for 5 days ──────────────
+const RAZORPAY_DIRECT_PROJECT_LINK = "https://rzp.io/rzp/NEeyCNKr"; // Replace with your ₹100 direct project payment link
+
+function initiateDirectProjectPayment(projectIndex) {
+  window.open(RAZORPAY_DIRECT_PROJECT_LINK, "_blank");
+  showDirectProjectConfirmModal(projectIndex);
+}
+
+function showDirectProjectConfirmModal(projectIndex) {
+  const existing = document.getElementById("directProjectConfirmModal");
+  if (existing) existing.remove();
+
+  const projectName = (ALL_PROJECTS && ALL_PROJECTS[projectIndex])
+    ? (ALL_PROJECTS[projectIndex].project_name || ALL_PROJECTS[projectIndex].name || "this project")
+    : "this project";
+
+  const modal = document.createElement("div");
+  modal.id = "directProjectConfirmModal";
+  modal.className = "modal-overlay";
+  modal.innerHTML = `
+    <div class="modal-box">
+      <h3>🔓 Open This Project</h3>
+      <p>A Razorpay payment page has been opened in a new tab.<br><br>
+      You're paying <strong>₹100</strong> to unlock <strong>${projectName}</strong> for <strong>5 days</strong>.<br><br>
+      Once payment is done, click <strong>"I've Paid"</strong> to unlock the project.</p>
+      <div class="modal-actions">
+        <button class="modal-btn-cancel" onclick="document.getElementById('directProjectConfirmModal').remove()">Cancel</button>
+        <button class="modal-btn-confirm" onclick="confirmDirectProjectUnlock(${projectIndex})">
+          ✅ I've Paid — Unlock Project
+        </button>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+}
+
+async function confirmDirectProjectUnlock(projectIndex) {
+  const modal = document.getElementById("directProjectConfirmModal");
+  if (modal) {
+    modal.querySelector(".modal-btn-confirm").disabled = true;
+    modal.querySelector(".modal-btn-confirm").textContent = "Unlocking…";
+  }
+  try {
+    const res = await fetch("/api/direct_project_unlock", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ project_index: projectIndex })
+    });
+    const d = await res.json();
+    if (d.ok) {
+      _walletData = d.wallet;
+      updateWalletBadge();
+      if (modal) modal.remove();
+      // Mark project as unlocked and reload it
+      if (ALL_PROJECTS[projectIndex]) ALL_PROJECTS[projectIndex].is_locked = false;
+      renderDropList();
+      const fullRes = await fetch(`/api/project/${projectIndex}`);
+      if (fullRes.status === 401) { location.reload(); return; }
+      const data = await fullRes.json();
+      currentProject = { project: data.project, graph: data.graph, index: projectIndex, locked: false };
+      renderProject(data.project, data.graph, projectIndex);
+      showToast("✅ Project unlocked for 5 days! Enjoy the full details.");
+    } else {
+      if (modal) modal.remove();
+      alert(d.error || "Could not unlock project. Please contact support.");
+    }
+  } catch(e) {
+    if (modal) modal.remove();
+    alert("Network error. Please try again.");
+  }
 }
 
 let dropBound = false;

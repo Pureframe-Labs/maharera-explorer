@@ -4,7 +4,7 @@ import os
 
 os.makedirs("graphs", exist_ok=True)
 
-for project in range(1,11):
+for project in range(1,301):
 
     towers=["Tower 1","Tower 2"]
 
